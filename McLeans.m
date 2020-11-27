@@ -29,8 +29,8 @@ isoChoice = 1;                      % Isotopologue(s) to be looked at
 isoFind = (data(:,2 )== isoChoice); 
 data = data(isoFind,(1:10));
 
-vStart = 6280;                      % Start of frequency range to be looked at 
-vEnd = 6283;                        % End of frequency range to be looked at 
+vStart = 6291;                      % Start of frequency range to be looked at 
+vEnd = 6293;                        % End of frequency range to be looked at 
 
 
 vFind = (data(:,3) >= vStart & data(:,3) <= vEnd);
@@ -52,7 +52,7 @@ step = 1000;
 
 [v,X,phiV,voigtFinal] = deal(zeros(dataSize,step)); 
 for k = 1:dataSize
-    v(k,:) = linspace(6280,6285,step);    % Frequency (cm-1)
+    v(k,:) = linspace(6290,6294,step);    % Frequency (cm-1)
 end
 totalContribution = zeros(1,step);
 
@@ -107,11 +107,18 @@ for k = 1:dataSize
 
     tempLineStrength(k) = S_t0(k) .*( (Q_tref/Q_t) .* (exp(-c2.*E_lower(k)./T) ./ exp(-c2.*E_lower(k)./T0)) .* ( (1-exp(-c2.*v0(k)./T)) ./(1-exp(-c2.*v0(k)./T0))));
     voigtFinal(k,:) =  2*P*concentration*pLength.*gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*sum(Vxy(:,:,k)');
-    totalContribution = totalContribution + voigtFinal(k,:);
 end
 
+absorbance = sum(voigtFinal);
 figure('units','normalized','outerposition',[0 0 1 1])
-plot(v(1,:),totalContribution)
+plot(v(1,:),absorbance)
+title("Voigt of transition ")
+xlabel("Frequency, cm-1")
+ylabel("Absorbance, -ln(I/Io)")
+grid on
+
+figure('units','normalized','outerposition',[0 0 1 1])
+plot(v(1,:),voigtFinal)
 title("Voigt of transition ")
 xlabel("Frequency, cm-1")
 ylabel("Absorbance, -ln(I/Io)")
