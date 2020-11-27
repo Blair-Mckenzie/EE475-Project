@@ -2,16 +2,15 @@ clc
 close all
 clear
 
-root = 'C:\Users\bmcke\Documents\MATLAB\EE475';
-            string = strcat(root,'\methaneq32.txt');
-            fid = fopen(string);
-            formatSpec  = '%4f %16f %*[^\n]';
-            S_t0 = textscan(fid,formatSpec);
-            fclose(fid);
-            partitions = cell2mat(S_t0);
 
+string = strcat(pwd,'\GasData\methaneq32.txt');
+fid = fopen(string);
+formatSpec  = '%4f %16f %*[^\n]';
+S_t0 = textscan(fid,formatSpec);
+fclose(fid);
+partitions = cell2mat(S_t0);
 
-data = csvread('C:\Users\bmcke\Documents\MATLAB\EE475\Methane.csv');
+data = csvread(strcat(pwd,'\GasData\Methane.csv'));
 
 % max = length(data);         % Length of data (will be used in calculations)
 c = 299792458*10^10;        % Speed of light
@@ -28,7 +27,7 @@ tran2 = 359601;
 tran3 = 359603;
 
 S_t0 = data(tran1,4);
-E_lower = data(tran1,10); 
+E_lower = data(tran2,10); 
 
 Q_tref = partitions(T0,:);
 Q_tref = Q_tref(2:end);
