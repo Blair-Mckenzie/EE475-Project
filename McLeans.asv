@@ -1,28 +1,28 @@
 clc
 close all
-clearvars -except tempdata partitions  
+clearvars -except tempdata partitions 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Reading in Partion data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if ~exist('tempdata','var')
-    partFilePath = strcat(pwd,'\GasData\methaneq32.txt');
-    fid = fopen(partFilePath);
-    formatSpec  = '%4f %16f %*[^\n]';
-    st0 = textscan(fid,formatSpec);
-    fclose(fid);
-    partitions = cell2mat(st0);
-end
-
+partFilePath = strcat(pwd,'\GasData\methaneq32.txt');
+fid = fopen(partFilePath);
+formatSpec  = '%4f %16f %*[^\n]';
+st0 = textscan(fid,formatSpec);
+fclose(fid);
+partitions = cell2mat(st0);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Reading in Gas data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if ~exist('tempdata','var')
-    tempdata = csvread(strcat(pwd,'\GasData\Methane.csv')); 
+if exist('tempdata','var')
+    
+else
+    
 end
 
-data = tempdata;
+
+
 numIso = max(data(:,2));            % Number of isotopologues in the gas file
 isoChoice = 1;                      % Isotopologue(s) to be looked at
 isoFind = (data(:,2 )== isoChoice); 
@@ -51,7 +51,7 @@ step = 1000;
 
 [v,X,phiV,voigtFinal] = deal(zeros(dataSize,step)); 
 for k = 1:dataSize
-    v(k,:) = linspace(vStart,vEnd,step);    % Frequency (cm-1)
+    v(k,:) = linspace(6290,6294,step);    % Frequency (cm-1)
 end
 totalContribution = zeros(1,step);
 
@@ -75,6 +75,8 @@ A = [-1.215, -1.3509, -1.215, -1.3509];
 B = [1.2359, 0.3786, -1.2359, -0.3786];
 C = [-0.3085, 0.5906, -0.3085, 0.5906];
 D = [0.021, -1.1858, -0.021, 1.1858];
+
+
 
 %Returns Gaussian FWHM
 gammaG = (GammaDoppler(v0,M,T))';
