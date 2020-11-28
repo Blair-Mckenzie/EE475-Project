@@ -109,14 +109,14 @@ end
 absorbance = sum(voigtFinal);
 figure('units','normalized','outerposition',[0 0 1 1])
 plot(v(1,:),absorbance)
-title("Voigt of transition ")
+title("Sum of voigt line shapes for range " + vStart + " to" + vEnd)
 xlabel("Frequency, cm-1")
 ylabel("Absorbance, -ln(I/Io)")
 grid on
 
 figure('units','normalized','outerposition',[0 0 1 1])
 plot(v(1,:),voigtFinal)
-title("Voigt of transition ")
+title("All voigt line shapes for range " + vStart + " to" + vEnd)
 xlabel("Frequency, cm-1")
 ylabel("Absorbance, -ln(I/Io)")
 grid on
