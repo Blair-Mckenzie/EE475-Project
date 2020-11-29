@@ -31,7 +31,6 @@ data = data(isoFind,(1:10));
 vStart = 6291;                      % Start of frequency range to be looked at 
 vEnd = 6293;                        % End of frequency range to be looked at 
 
-
 vFind = (data(:,3) >= vStart & data(:,3) <= vEnd);
 data = data(vFind,(1:10));
 dataSize = size(data,1);
@@ -39,7 +38,7 @@ dataSize = size(data,1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Declaring Constants 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-c = 299792458*10^10;                % Speed of light (cm-1)
+c = 299792458;                      % Speed of light (cm-1)
 c2 = 1.4387769;                     % Second radiation constant 
 M = 16.04;                          % Molecular mass of methane
 T0 = 296;                           % Reference temperature(Kelvin)
@@ -49,10 +48,9 @@ concentration = 0.02;               % Concentration
 pLength = 1;                        % Length
 step = 1000;
 
-[v,X,phiV,voigtFinal] = deal(zeros(dataSize,step)); 
-for k = 1:dataSize
-    v(k,:) = linspace(vStart,vEnd,step);    % Frequency (cm-1)
-end
+[X,phiV,voigtFinal] = deal(zeros(dataSize,step));
+
+v = repmat(linspace(vStart,vEnd,step),dataSize,1);
 totalContribution = zeros(1,step);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -63,6 +61,7 @@ S_t0 = data(:,4);               % Line Intensity
 gammaAir = data(:,6);           % Air broadened HWHM 
 gammaSelf = data(:,7);          % Self broadened HWHM
 n = data(:,8);                  % Temperature dependent coefficient for air broadened HWHM(Lorentzian)
+pShift = data(:,9);             % Pressure Shift induced by air
 E_lower = data(:,10);           % Lower State Energy
 
 Q_tref = partitions(T0,:);
@@ -93,7 +92,7 @@ tempLineStrength = zeros(dataSize,1);
 
 for k = 1:dataSize
     %Calculating X for Voigt lineshape
-     X(k,:) = (2*sqrt(log(2))./gammaG(k)).*(v(k,:)-v0(k)');
+     X(k,:) = (2*sqrt(log(2))./gammaG(k)).*(v(k,:)-v0(k)')-(P.*pShift(k));
     
     for index = 1:4
     Vxy(:,index,k) = ((C(index).*(Y(k)-A(index)))+D(index).*(X(k,:)-B(index))) ./ ((Y(k)-A(index)).^2 + (X(k,:)-B(index)).^2);
@@ -107,6 +106,7 @@ for k = 1:dataSize
 end
 
 absorbance = sum(voigtFinal);
+
 figure('units','normalized','outerposition',[0 0 1 1])
 plot(v(1,:),absorbance)
 title("Sum of voigt line shapes for range " + vStart + " to" + vEnd)
