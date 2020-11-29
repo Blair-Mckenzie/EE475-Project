@@ -80,7 +80,7 @@ D = [0.021, -1.1858, -0.021, 1.1858];
 gammaG = (GammaDoppler(v0,M,T))';
 
 %Gives the Lorentzian FWHM
-gammaL = ((2*P).*(((concentration.*gammaSelf).*(T0/T).^n) + (1-concentration.*gammaAir).*(T0/T).^n))';
+gammaL = ((2*P).*(((concentration.*gammaSelf).*(T0/T).^n) + ((1-concentration).*gammaAir).*(T0/T).^n))';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Calculating Voigt Lineshape 
