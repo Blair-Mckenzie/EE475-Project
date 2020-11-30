@@ -28,8 +28,8 @@ isoChoice = 1;                      % Isotopologue(s) to be looked at
 isoFind = (data(:,2 )== isoChoice); 
 data = data(isoFind,(1:10));
 
-vStart = 6291;                      % Start of frequency range to be looked at 
-vEnd = 6293;                        % End of frequency range to be looked at 
+vStart = 100;                      % Start of frequency range to be looked at 
+vEnd = 105 ;                        % End of frequency range to be looked at 
 
 vFind = (data(:,3) >= vStart & data(:,3) <= vEnd);
 data = data(vFind,(1:10));
@@ -49,7 +49,6 @@ pLength = 1;                        % Length
 step = 1000;
 
 [X,phiV,voigtFinal] = deal(zeros(dataSize,step));
-
 v = repmat(linspace(vStart,vEnd,step),dataSize,1);
 totalContribution = zeros(1,step);
 
@@ -76,7 +75,7 @@ C = [-0.3085, 0.5906, -0.3085, 0.5906];
 D = [0.021, -1.1858, -0.021, 1.1858];
 
 %Returns Gaussian FWHM
-gammaG = (GammaDoppler(v0,M,T))';
+gammaG = (v0.*7.1623e-7.*sqrt(T/M))';
 
 %Gives the Lorentzian FWHM
 gammaL = ((2*P).*(((concentration.*gammaSelf).*(T0/T).^n) + ((1-concentration).*gammaAir).*(T0/T).^n))';
@@ -109,14 +108,14 @@ absorbance = sum(voigtFinal);
 
 figure('units','normalized','outerposition',[0 0 1 1])
 plot(v(1,:),absorbance)
-title("Sum of voigt line shapes for range " + vStart + " to" + vEnd)
+title("Sum of voigt line shapes for range " + vStart + " to " + vEnd)
 xlabel("Frequency, cm-1")
 ylabel("Absorbance, -ln(I/Io)")
 grid on
 
 figure('units','normalized','outerposition',[0 0 1 1])
 plot(v(1,:),voigtFinal)
-title("All voigt line shapes for range " + vStart + " to" + vEnd)
+title("All voigt line shapes for range " + vStart + " to " + vEnd)
 xlabel("Frequency, cm-1")
 ylabel("Absorbance, -ln(I/Io)")
 grid on
