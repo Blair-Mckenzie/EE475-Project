@@ -23,13 +23,15 @@ if ~exist('tempdata','var')
 end
 
 data = tempdata;
+
+
 numIso = max(data(:,2));            % Number of isotopologues in the gas file
 isoChoice = 1;                      % Isotopologue(s) to be looked at
 isoFind = (data(:,2 )== isoChoice); 
 data = data(isoFind,(1:10));
 
-vStart = 100;                      % Start of frequency range to be looked at 
-vEnd = 105 ;                        % End of frequency range to be looked at 
+vStart = 6291;                      % Start of frequency range to be looked at 
+vEnd = 6293;                        % End of frequency range to be looked at 
 
 vFind = (data(:,3) >= vStart & data(:,3) <= vEnd);
 data = data(vFind,(1:10));
@@ -110,7 +112,7 @@ figure('units','normalized','outerposition',[0 0 1 1])
 plot(v(1,:),absorbance)
 title("Sum of voigt line shapes for range " + vStart + " to " + vEnd)
 xlabel("Frequency, cm-1")
-ylabel("Absorbance, -ln(I/Io)")
+ylabel("Absorbance, (I/Io)")
 grid on
 
 figure('units','normalized','outerposition',[0 0 1 1])
