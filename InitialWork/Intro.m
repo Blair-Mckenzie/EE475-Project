@@ -25,5 +25,8 @@ grid on
 title('Convolution of Guassian and Lorentzian PDFs')
 hold on
 plot(x,yLorent);
+hold on
 plot(xVoigt,yVoigt);
 legend('Guassian','Lorentzian','Convolution');
+xlabel('x')
+ylabel('Data Probability Density')

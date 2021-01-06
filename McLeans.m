@@ -19,11 +19,12 @@ end
 % Reading in Gas data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if ~exist('tempdata','var')
-    tempdata = csvread(strcat(pwd,'\GasData\Methane.csv')); 
+    load('HITRAN','tempdata')
+%     tempdata = csvread(strcat(pwd,'\GasData\Methane.csv')); 
 end
 
 data = tempdata;
-
+% save('HITRAN','tempdata');
 
 numIso = max(data(:,2));            % Number of isotopologues in the gas file
 isoChoice = 1;                      % Isotopologue(s) to be looked at
@@ -50,7 +51,7 @@ concentration = 0.02;               % Concentration
 pLength = 1;                        % Length
 step = 1000;
 
-[X,phiV,voigtFinal] = deal(zeros(dataSize,step));
+[X,phiV,simpleApprox,voigtFinal,voigtFinal1] = deal(zeros(dataSize,step));
 v = repmat(linspace(vStart,vEnd,step),dataSize,1);
 totalContribution = zeros(1,step);
 
@@ -85,6 +86,16 @@ gammaL = ((2*P).*(((concentration.*gammaSelf).*(T0/T).^n) + ((1-concentration).*
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Calculating Voigt Lineshape 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Voigt HWHM approximation
+gammaV =  (0.5346*gammaL + sqrt(0.2166*gammaL.^2+gammaG.^2)./2);
+%Lorentzian and Gaussian HWHMs
+sigmaL = gammaL./2;
+sigmaG = gammaG ./2 ;
+
+d = (sigmaL - sigmaG)./(sigmaL + sigmaG);
+c_L = 0.68188 + 0.61293.*d - 0.18384.*d.^2 -0.11568.*d.^3;
+c_G = 0.32460 - 0.61825 .*d + 0.17681.*d.^2 + 0.12109.*d.^3;
+
 
 %Calculating Y for Voigt lineshape
 Y = (gammaL.*sqrt(log(2)))./gammaG;
@@ -95,6 +106,9 @@ for k = 1:dataSize
     %Calculating X for Voigt lineshape
      X(k,:) = (2*sqrt(log(2))./gammaG(k)).*(v(k,:)-v0(k)')-(P.*pShift(k));
     
+    %empirical expression to approximate the Voigt function 
+    simpleApprox(k,:) = ( (c_L(k) .* 1/pi) .* (gammaV(k)./(v(k,:)-v0(k).^2) + gammaV(k).^2) ) + c_G(k) .* (sqrt(log(2))./ sqrt(pi) .* gammaV(k) ) .* exp( (-log(2).*(v(k,:)-v0(k)).^2 ) ./ (gammaV(k).^2) ) ;
+     
     for index = 1:4
     Vxy(:,index,k) = ((C(index).*(Y(k)-A(index)))+D(index).*(X(k,:)-B(index))) ./ ((Y(k)-A(index)).^2 + (X(k,:)-B(index)).^2);
     end
@@ -104,20 +118,29 @@ for k = 1:dataSize
 
     tempLineStrength(k) = S_t0(k) .*( (Q_tref/Q_t) .* (exp(-c2.*E_lower(k)./T) ./ exp(-c2.*E_lower(k)./T0)) .* ( (1-exp(-c2.*v0(k)./T)) ./(1-exp(-c2.*v0(k)./T0))));
     voigtFinal(k,:) =  2*P*concentration*pLength.*gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*sum(Vxy(:,:,k)');
+    voigtFinal1(k,:) =  2*P*concentration*pLength.*gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*(simpleApprox(k,:));
 end
 
-absorbance = sum(voigtFinal);
+mcleans = sum(voigtFinal);
+simpleEmpirical = sum(voigtFinal1);
 
 figure('units','normalized','outerposition',[0 0 1 1])
-plot(v(1,:),absorbance)
-title("Sum of voigt line shapes for range " + vStart + " to " + vEnd)
+plot(v(1,:),mcleans)
+title("Sum of voigt line shapes using Mcleans for range " + vStart + " to " + vEnd)
 xlabel("Frequency, cm-1")
 ylabel("Absorbance, (I/Io)")
 grid on
 
+% figure('units','normalized','outerposition',[0 0 1 1])
+% plot(v(1,:),voigtFinal)
+% title("All voigt line shapes for range " + vStart + " to " + vEnd)
+% xlabel("Frequency, cm-1")
+% ylabel("Absorbance, -ln(I/Io)")
+% grid on
+
 figure('units','normalized','outerposition',[0 0 1 1])
-plot(v(1,:),voigtFinal)
-title("All voigt line shapes for range " + vStart + " to " + vEnd)
+plot(v(1,:),simpleEmpirical);
+title("Sum of voigt line shapes using a simple empirical approximation for range " + vStart + " to " + vEnd)
 xlabel("Frequency, cm-1")
-ylabel("Absorbance, -ln(I/Io)")
+ylabel("Absorbance, (I/Io)")
 grid on
