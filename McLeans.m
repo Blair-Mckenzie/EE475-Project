@@ -107,8 +107,8 @@ for k = 1:dataSize
      X(k,:) = (2*sqrt(log(2))./gammaG(k)).*(v(k,:)-v0(k)')-(P.*pShift(k));
     
     %empirical expression to approximate the Voigt function 
-    simpleApprox(k,:) = ( (c_L(k) .* 1/pi) .* (gammaV(k)./(v(k,:)-v0(k).^2) + gammaV(k).^2) ) + c_G(k) .* (sqrt(log(2))./ sqrt(pi) .* gammaV(k) ) .* exp( (-log(2).*(v(k,:)-v0(k)).^2 ) ./ (gammaV(k).^2) ) ;
-     
+%     simpleApprox(k,:) = ( (c_L(k) .* 1/pi) .* (gammaV(k)./(v(k,:)-v0(k).^2) + gammaV(k).^2) ) + c_G(k) .* (sqrt(log(2))./ sqrt(pi) .* gammaV(k) ) .* exp( (-log(2).*(v(k,:)-v0(k)).^2 ) ./ (gammaV(k).^2) ) ;
+%      
     for index = 1:4
     Vxy(:,index,k) = ((C(index).*(Y(k)-A(index)))+D(index).*(X(k,:)-B(index))) ./ ((Y(k)-A(index)).^2 + (X(k,:)-B(index)).^2);
     end
@@ -138,9 +138,9 @@ grid on
 % ylabel("Absorbance, -ln(I/Io)")
 % grid on
 
-figure('units','normalized','outerposition',[0 0 1 1])
-plot(v(1,:),simpleEmpirical);
-title("Sum of voigt line shapes using a simple empirical approximation for range " + vStart + " to " + vEnd)
-xlabel("Frequency, cm-1")
-ylabel("Absorbance, (I/Io)")
-grid on
+% figure('units','normalized','outerposition',[0 0 1 1])
+% plot(v(1,:),simpleEmpirical);
+% title("Sum of voigt line shapes using a simple empirical approximation for range " + vStart + " to " + vEnd)
+% xlabel("Frequency, cm-1")
+% ylabel("Absorbance, (I/Io)")
+% grid on
