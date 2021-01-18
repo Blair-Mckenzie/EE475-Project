@@ -14,14 +14,15 @@ if ~exist('tempdata','var')
     partitions = cell2mat(st0);
 end
 
+ spectraPlot = (csvread(strcat(pwd,'\GasData\SpectraPlot.csv'))');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Reading in Gas data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if ~exist('tempdata','var')
     load('HITRAN','tempdata')
-%     tempdata = csvread(strcat(pwd,'\GasData\Methane.csv')); 
 end
+
 
 data = tempdata;
 % save('HITRAN','tempdata');
@@ -107,8 +108,8 @@ for k = 1:dataSize
      X(k,:) = (2*sqrt(log(2))./gammaG(k)).*(v(k,:)-v0(k)')-(P.*pShift(k));
     
     %empirical expression to approximate the Voigt function 
-%     simpleApprox(k,:) = ( (c_L(k) .* 1/pi) .* (gammaV(k)./(v(k,:)-v0(k).^2) + gammaV(k).^2) ) + c_G(k) .* (sqrt(log(2))./ sqrt(pi) .* gammaV(k) ) .* exp( (-log(2).*(v(k,:)-v0(k)).^2 ) ./ (gammaV(k).^2) ) ;
-%      
+    simpleApprox(k,:) = ( (c_L(k) .* 1/pi) .* (gammaV(k)./(v(k,:)-v0(k).^2) + gammaV(k).^2) ) + c_G(k) .* (sqrt(log(2))./ sqrt(pi) .* gammaV(k) ) .* exp( (-log(2).*(v(k,:)-v0(k)).^2 ) ./ (gammaV(k).^2) ) ;
+     
     for index = 1:4
     Vxy(:,index,k) = ((C(index).*(Y(k)-A(index)))+D(index).*(X(k,:)-B(index))) ./ ((Y(k)-A(index)).^2 + (X(k,:)-B(index)).^2);
     end
@@ -124,12 +125,16 @@ end
 mcleans = sum(voigtFinal);
 simpleEmpirical = sum(voigtFinal1);
 
-figure('units','normalized','outerposition',[0 0 1 1])
-plot(v(1,:),mcleans)
-title("Sum of voigt line shapes using Mcleans for range " + vStart + " to " + vEnd)
-xlabel("Frequency, cm-1")
-ylabel("Absorbance, (I/Io)")
-grid on
+% figure('units','normalized','outerposition',[0 0 1 1])
+% yyaxis left
+% plot(v(1,:),mcleans)
+% title("Mcleans against SpectraPlot for range " + vStart + " to " + vEnd +" cm-1")
+% xlabel("Frequency, cm-1")
+% ylabel("Absorbance, (I/Io)")
+% grid on
+% yyaxis right
+% plot(v(1,:),spectraPlot)
+% legend('Mcleans Model','SpectraPlot Model');
 
 % figure('units','normalized','outerposition',[0 0 1 1])
 % plot(v(1,:),voigtFinal)
@@ -138,9 +143,13 @@ grid on
 % ylabel("Absorbance, -ln(I/Io)")
 % grid on
 
-% figure('units','normalized','outerposition',[0 0 1 1])
-% plot(v(1,:),simpleEmpirical);
-% title("Sum of voigt line shapes using a simple empirical approximation for range " + vStart + " to " + vEnd)
-% xlabel("Frequency, cm-1")
-% ylabel("Absorbance, (I/Io)")
-% grid on
+figure('units','normalized','outerposition',[0 0 1 1])
+yyaxis left
+plot(v(1,:),simpleEmpirical);
+title("Simple empirical approximation vs Mcleans for range " + vStart + " to " + vEnd)
+xlabel("Frequency, cm-1")
+ylabel("Absorbance, (I/Io)")
+grid on
+yyaxis right
+plot(v(1,:),mcleans)
+legend('Simple Empirical approxiamtion','Mcleans Model');
