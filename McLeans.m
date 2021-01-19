@@ -27,6 +27,24 @@ end
 data = tempdata;
 % save('HITRAN','tempdata');
 
+folderspec = strcat(pwd,'\GasData');
+formatspec  = '%1f %1f  %12.6f %10f %10f %5.4f %5.3f %4.2f  %8.6f %10.4f %*[^\n]';
+myFiles = dir(fullfile(folderspec,'*.csv'));
+
+for k = 1 : length(myFiles)
+    fileName = myFiles(k).name;
+    M = csvread(strcat(folderspec,'\',fileName));
+    save((fileName(1:end-4)),'M');
+
+end
+
+
+%     fid = fopen( fullfile( folderspec, myFiles(k).name ), 'r' );
+%     cac = textscan(fid,formatspec);
+%     fclose(fid);
+%     gasfiles = cell2mat(cac);
+
+
 numIso = max(data(:,2));            % Number of isotopologues in the gas file
 isoChoice = 1;                      % Isotopologue(s) to be looked at
 isoFind = (data(:,2 )== isoChoice); 
