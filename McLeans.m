@@ -14,7 +14,6 @@ if ~exist('tempdata','var')
     partitions = cell2mat(st0);
 end
 
- spectraPlot = (csvread(strcat(pwd,'\GasData\SpectraPlot.csv'))');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Reading in Gas data
@@ -23,6 +22,8 @@ if ~exist('tempdata','var')
     load('HITRAN','tempdata')
 end
 
+load(strcat(pwd,'\GasData\SpectraPlot'),'gasData')
+spectraPlot = gasData;
 
 data = tempdata;
 % save('HITRAN','tempdata');
@@ -31,12 +32,11 @@ folderspec = strcat(pwd,'\GasData');
 formatspec  = '%1f %1f  %12.6f %10f %10f %5.4f %5.3f %4.2f  %8.6f %10.4f %*[^\n]';
 myFiles = dir(fullfile(folderspec,'*.csv'));
 
-for k = 1 : length(myFiles)
-    fileName = myFiles(k).name;
-    M = csvread(strcat(folderspec,'\',fileName));
-    save((fileName(1:end-4)),'M');
-
-end
+% for k = 1 : length(myFiles)
+%     fileName = myFiles(k).name;
+%     gasData = csvread(strcat(folderspec,'\',fileName));
+%     save((fileName(1:end-4)),'gasData');
+% end
 
 
 %     fid = fopen( fullfile( folderspec, myFiles(k).name ), 'r' );
@@ -68,7 +68,7 @@ T = 1000;                           % Temperature of system (Kelvin)
 P = 1;                              % Pressure of system (Atmosphere)
 concentration = 0.02;               % Concentration
 pLength = 1;                        % Length
-step = 1000;
+step = 200;
 
 [X,phiV,simpleApprox,voigtFinal,voigtFinal1] = deal(zeros(dataSize,step));
 v = repmat(linspace(vStart,vEnd,step),dataSize,1);
@@ -143,16 +143,16 @@ end
 mcleans = sum(voigtFinal);
 simpleEmpirical = sum(voigtFinal1);
 
-% figure('units','normalized','outerposition',[0 0 1 1])
-% yyaxis left
-% plot(v(1,:),mcleans)
-% title("Mcleans against SpectraPlot for range " + vStart + " to " + vEnd +" cm-1")
-% xlabel("Frequency, cm-1")
-% ylabel("Absorbance, (I/Io)")
-% grid on
-% yyaxis right
-% plot(v(1,:),spectraPlot)
-% legend('Mcleans Model','SpectraPlot Model');
+figure('units','normalized','outerposition',[0 0 1 1])
+yyaxis left
+plot(v(1,:),mcleans)
+title("Mcleans against SpectraPlot for range " + vStart + " to " + vEnd +" cm-1")
+xlabel("Frequency, cm-1")
+ylabel("Absorbance, (I/Io)")
+grid on
+yyaxis right
+plot(v(1,:),spectraPlot)
+legend('Mcleans Model','SpectraPlot Model');
 
 % figure('units','normalized','outerposition',[0 0 1 1])
 % plot(v(1,:),voigtFinal)
