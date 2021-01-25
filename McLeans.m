@@ -1,54 +1,65 @@
 clc
 close all
-clearvars -except tempdata partitions  
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Reading in Partion data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if ~exist('tempdata','var')
-    partFilePath = strcat(pwd,'\GasData\methaneq32.txt');
-    fid = fopen(partFilePath);
-    formatSpec  = '%4f %16f %*[^\n]';
-    st0 = textscan(fid,formatSpec);
-    fclose(fid);
-    partitions = cell2mat(st0);
-end
-
+clearvars -except GasTransitions gasData 
+%partitions  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Reading in Gas data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if ~exist('tempdata','var')
-    load('HITRAN','tempdata')
-end
+%Check to see if data has already been loaded into the workspace
+% if ~exist('GasTransitions','var')
+%     load(strcat(pwd,'\GasData\','gasTransitions'),'GasTransitions')
+% end
+% data = GasTransitions;
+% 
+% %Map of Gas Names to Global ID from HITRAN database
+% keySet = {'Water','Carbon Dioxide','Ozone','Nitrogen Oxide','Carbon Monoxide','Methane','Oxygen','Nitric Oxide','Sulfur Dioxide','Nitrogen Dioxide','Ammonia','Nitric Acid','Hydroxyl','Hydrogen Fluoride','Hydrogen Chloride','Hydrogen Bromide','Hydrogen Iodide','Chlorine Monoxide','Carbonyl Sulfide','Formaldehyde','Hypochlorous Acid','Nitrogen','Hydrogen Cyanide','Methyl Chloride','Hydrogen Peroxide','Acetylene','Ethane','Phosphine','Carbonyl Fluoride','Hydrogen Sulfide','Formic Acid','Hydroperoxyl','Oxygen Atom','Nitric Oxide Cation','Hypobromous Acid','Methanol','Methyl Bromide','Acetonitrile','Diacetylene','Cyanoacetylene','Hydrogen','Carbon Monosulfide','Sulfur trioxide','Cyanogen','Phosgene','Carbon disulfide'};
+% valueSet = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 31 32 33 34 36 37 39 40 41 43 44 45 46 47 48 49 53];
+% gases = containers.Map(keySet,valueSet);
+% 
+% gasChoice = 'Methane';                      % Gas to be modelled                      
+% gasFind = (data(:,1)== gases(gasChoice));   % Creates a logical matrix with all rows that match the gas choice
+% data = data(gasFind,(1:10));                % Uses the new matrix to rezise the data to only include the selected gas
+% 
+% if ~exist('gasData','var')
+%     load(strcat(pwd,'\GasData\SpectraPlot'),'gasData')
+% end
+% spectraPlot = gasData;
 
-load(strcat(pwd,'\GasData\SpectraPlot'),'gasData')
-spectraPlot = gasData;
 
-data = tempdata;
-% save('HITRAN','tempdata');
+%Goes Through each .mat file in the GasData fodler
+%and combines them vertically to obtain one single .mat 
+%file for all the gases in the HITRAN databse
 
 folderspec = strcat(pwd,'\GasData');
-formatspec  = '%1f %1f  %12.6f %10f %10f %5.4f %5.3f %4.2f  %8.6f %10.4f %*[^\n]';
-myFiles = dir(fullfile(folderspec,'*.csv'));
+myFiles = dir(fullfile(folderspec,'*.mat'));
+N = natsortfiles({myFiles.name});
+C = cell(1,numel(N));
 
-% for k = 1 : length(myFiles)
-%     fileName = myFiles(k).name;
-%     gasData = csvread(strcat(folderspec,'\',fileName));
-%     save((fileName(1:end-4)),'gasData');
-% end
-
-
-%     fid = fopen( fullfile( folderspec, myFiles(k).name ), 'r' );
-%     cac = textscan(fid,formatspec);
-%     fclose(fid);
-%     gasfiles = cell2mat(cac);
+for k = 1: numel(N)
+T = load(fullfile(folderspec,N{k}));
+C(k) = struct2cell(T);
+end
+GasTransitions = vertcat(C{:});
+save('gasTransitions','GasTransitions')
 
 
 numIso = max(data(:,2));            % Number of isotopologues in the gas file
 isoChoice = 1;                      % Isotopologue(s) to be looked at
 isoFind = (data(:,2 )== isoChoice); 
 data = data(isoFind,(1:10));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Reading in Partion data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% if ~exist('tempdata','var')
+    partFilePath = strcat(pwd,'\GasData\',gasChoice,num2str(isoChoice),'.txt');
+    fid = fopen(partFilePath);
+    formatSpec  = '%4f %16f %*[^\n]';
+    st0 = textscan(fid,formatSpec);
+    fclose(fid);
+    partitions = cell2mat(st0);
+% end
 
 vStart = 6291;                      % Start of frequency range to be looked at 
 vEnd = 6293;                        % End of frequency range to be looked at 
@@ -70,7 +81,10 @@ concentration = 0.02;               % Concentration
 pLength = 1;                        % Length
 step = 200;
 
-[X,phiV,simpleApprox,voigtFinal,voigtFinal1] = deal(zeros(dataSize,step));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Allocating size of arrays 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+[x,X,phiV,simpleApprox,humlicekApprox,voigtFinal,voigtFinal1,voigtFinal2] = deal(zeros(dataSize,step));
 v = repmat(linspace(vStart,vEnd,step),dataSize,1);
 totalContribution = zeros(1,step);
 
@@ -110,24 +124,41 @@ gammaV =  (0.5346*gammaL + sqrt(0.2166*gammaL.^2+gammaG.^2)./2);
 %Lorentzian and Gaussian HWHMs
 sigmaL = gammaL./2;
 sigmaG = gammaG ./2 ;
-
+%Variables used for Empirical Approximation
 d = (sigmaL - sigmaG)./(sigmaL + sigmaG);
 c_L = 0.68188 + 0.61293.*d - 0.18384.*d.^2 -0.11568.*d.^3;
 c_G = 0.32460 - 0.61825 .*d + 0.17681.*d.^2 + 0.12109.*d.^3;
 
-
 %Calculating Y for Voigt lineshape
 Y = (gammaL.*sqrt(log(2)))./gammaG;
+% y for humlicek voigt
+y = (gammaL.*sqrt(log(2)))./sigmaG;
+n =12;
+sigma = 1.5;
+x_k = [ 0.314240376254359 0.947788391240164 1.597682635152605 2.279507080501060 3.020637025120890 3.889724897869782];
+w_k = [ 0.5701352362625 0.2604923102642 0.5160798561588 0.3905390584629 0.8573687043588 0.2658551684356];
+
+
 Vxy = zeros(step,4,dataSize);
 tempLineStrength = zeros(dataSize,1);
+result = zeros(step,n/2,dataSize);
 
 for k = 1:dataSize
     %Calculating X for Voigt lineshape
      X(k,:) = (2*sqrt(log(2))./gammaG(k)).*(v(k,:)-v0(k)')-(P.*pShift(k));
+    % x for humlicek voigt 
+     x(k,:) = (2*sqrt(log(2))./sigmaG(k)).*(v(k,:)-v0(k)')-(P.*pShift(k));
     
     %empirical expression to approximate the Voigt function 
     simpleApprox(k,:) = ( (c_L(k) .* 1/pi) .* (gammaV(k)./(v(k,:)-v0(k).^2) + gammaV(k).^2) ) + c_G(k) .* (sqrt(log(2))./ sqrt(pi) .* gammaV(k) ) .* exp( (-log(2).*(v(k,:)-v0(k)).^2 ) ./ (gammaV(k).^2) ) ;
-     
+    
+    for kk = 1:n/2
+        a_k = -1*(1/pi)*w_k(kk)*exp(sigma)^2 * sin(2*x_k(kk))*sigma;
+        b_k = (1/pi)*w_k(kk)*exp(sigma)^2 * cos(2*x_k(kk))*sigma;
+        result(:,kk,k) = ( ( y(k)./ ((x(k,:)-x_k(kk)).^2 + sigma^2) ) .*( (b_k.*( (x(k,:)-x_k(kk)).^2 -sigma.*(y(k) + sigma)) - a_k.*(x(k,:)-x_k(kk)).*(y(k)+2.*sigma)) ./ ( (x(k,:)-x_k(kk)).^2 + (y(k)+sigma).^2)) );
+    end
+    humlicekApprox(k,:) = exp(-1.*x(k,:).^2) + sum(result(:,:,k)');
+    
     for index = 1:4
     Vxy(:,index,k) = ((C(index).*(Y(k)-A(index)))+D(index).*(X(k,:)-B(index))) ./ ((Y(k)-A(index)).^2 + (X(k,:)-B(index)).^2);
     end
@@ -138,36 +169,52 @@ for k = 1:dataSize
     tempLineStrength(k) = S_t0(k) .*( (Q_tref/Q_t) .* (exp(-c2.*E_lower(k)./T) ./ exp(-c2.*E_lower(k)./T0)) .* ( (1-exp(-c2.*v0(k)./T)) ./(1-exp(-c2.*v0(k)./T0))));
     voigtFinal(k,:) =  2*P*concentration*pLength.*gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*sum(Vxy(:,:,k)');
     voigtFinal1(k,:) =  2*P*concentration*pLength.*gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*(simpleApprox(k,:));
+    voigtFinal2(k,:) =  2*P*concentration*pLength.*gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*(humlicekApprox(k,:));
+    
 end
 
 mcleans = sum(voigtFinal);
 simpleEmpirical = sum(voigtFinal1);
+humlicek = sum(voigtFinal2);
 
 figure('units','normalized','outerposition',[0 0 1 1])
-yyaxis left
 plot(v(1,:),mcleans)
-title("Mcleans against SpectraPlot for range " + vStart + " to " + vEnd +" cm-1")
+title("All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd)
 xlabel("Frequency, cm-1")
-ylabel("Absorbance, (I/Io)")
+ylabel("Absorbance, -ln(I/Io)")
 grid on
-yyaxis right
-plot(v(1,:),spectraPlot)
-legend('Mcleans Model','SpectraPlot Model');
 
 % figure('units','normalized','outerposition',[0 0 1 1])
-% plot(v(1,:),voigtFinal)
-% title("All voigt line shapes for range " + vStart + " to " + vEnd)
+% yyaxis left
+% plot(v(1,:),mcleans)
+% title("Mcleans against SpectraPlot for range " + vStart + " to " + vEnd +" cm-1")
 % xlabel("Frequency, cm-1")
-% ylabel("Absorbance, -ln(I/Io)")
+% ylabel("Absorbance, (I/Io)")
 % grid on
-
-figure('units','normalized','outerposition',[0 0 1 1])
-yyaxis left
-plot(v(1,:),simpleEmpirical);
-title("Simple empirical approximation vs Mcleans for range " + vStart + " to " + vEnd)
-xlabel("Frequency, cm-1")
-ylabel("Absorbance, (I/Io)")
-grid on
-yyaxis right
-plot(v(1,:),mcleans)
-legend('Simple Empirical approxiamtion','Mcleans Model');
+% yyaxis right
+% plot(v(1,:),spectraPlot)
+% legend('Mcleans Model','SpectraPlot Model');
+% % 
+% figure('units','normalized','outerposition',[0 0 1 1])
+% yyaxis left
+% plot(v(1,:),simpleEmpirical);
+% title("Simple empirical approximation vs Mcleans for range " + vStart + " to " + vEnd)
+% xlabel("Frequency, cm-1")
+% ylabel("Absorbance, (I/Io)")
+% grid on
+% yyaxis right
+% plot(v(1,:),mcleans)
+% legend('Simple Empirical approxiamtion','Mcleans Model');
+% 
+% figure('units','normalized','outerposition',[0 0 1 1])
+% yyaxis left
+% plot(v(1,:),simpleEmpirical)
+% title("Simple Empirical Approximation against SpectraPlot for range " + vStart + " to " + vEnd +" cm-1")
+% xlabel("Frequency, cm-1")
+% ylabel("Absorbance, (I/Io)")
+% grid on
+% yyaxis right
+% plot(v(1,:),spectraPlot)
+% legend('Simple Empirical Approximation','SpectraPlot Model');
+% 
+% % GUI(gases)
