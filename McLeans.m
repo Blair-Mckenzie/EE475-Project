@@ -7,41 +7,41 @@ clearvars -except GasTransitions gasData
 % Reading in Gas data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Check to see if data has already been loaded into the workspace
-% if ~exist('GasTransitions','var')
-%     load(strcat(pwd,'\GasData\','gasTransitions'),'GasTransitions')
-% end
-% data = GasTransitions;
-% 
-% %Map of Gas Names to Global ID from HITRAN database
-% keySet = {'Water','Carbon Dioxide','Ozone','Nitrogen Oxide','Carbon Monoxide','Methane','Oxygen','Nitric Oxide','Sulfur Dioxide','Nitrogen Dioxide','Ammonia','Nitric Acid','Hydroxyl','Hydrogen Fluoride','Hydrogen Chloride','Hydrogen Bromide','Hydrogen Iodide','Chlorine Monoxide','Carbonyl Sulfide','Formaldehyde','Hypochlorous Acid','Nitrogen','Hydrogen Cyanide','Methyl Chloride','Hydrogen Peroxide','Acetylene','Ethane','Phosphine','Carbonyl Fluoride','Hydrogen Sulfide','Formic Acid','Hydroperoxyl','Oxygen Atom','Nitric Oxide Cation','Hypobromous Acid','Methanol','Methyl Bromide','Acetonitrile','Diacetylene','Cyanoacetylene','Hydrogen','Carbon Monosulfide','Sulfur trioxide','Cyanogen','Phosgene','Carbon disulfide'};
-% valueSet = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 31 32 33 34 36 37 39 40 41 43 44 45 46 47 48 49 53];
-% gases = containers.Map(keySet,valueSet);
-% 
-% gasChoice = 'Methane';                      % Gas to be modelled                      
-% gasFind = (data(:,1)== gases(gasChoice));   % Creates a logical matrix with all rows that match the gas choice
-% data = data(gasFind,(1:10));                % Uses the new matrix to rezise the data to only include the selected gas
-% 
-% if ~exist('gasData','var')
-%     load(strcat(pwd,'\GasData\SpectraPlot'),'gasData')
-% end
-% spectraPlot = gasData;
+if ~exist('GasTransitions','var')
+    load(strcat('C:\Users\Blair\Documents\Uni\4thYear','gasTransitions'),'GasTransitions')
+end
+data = GasTransitions;
+
+%Map of Gas Names to Global ID from HITRAN database
+keySet = {'Water','Carbon Dioxide','Ozone','Nitrogen Oxide','Carbon Monoxide','Methane','Oxygen','Nitric Oxide','Sulfur Dioxide','Nitrogen Dioxide','Ammonia','Nitric Acid','Hydroxyl','Hydrogen Fluoride','Hydrogen Chloride','Hydrogen Bromide','Hydrogen Iodide','Chlorine Monoxide','Carbonyl Sulfide','Formaldehyde','Hypochlorous Acid','Nitrogen','Hydrogen Cyanide','Methyl Chloride','Hydrogen Peroxide','Acetylene','Ethane','Phosphine','Carbonyl Fluoride','Hydrogen Sulfide','Formic Acid','Hydroperoxyl','Oxygen Atom','Nitric Oxide Cation','Hypobromous Acid','Methanol','Methyl Bromide','Acetonitrile','Diacetylene','Cyanoacetylene','Hydrogen','Carbon Monosulfide','Sulfur trioxide','Cyanogen','Phosgene','Carbon disulfide'};
+valueSet = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 31 32 33 34 36 37 39 40 41 43 44 45 46 47 48 49 53];
+gases = containers.Map(keySet,valueSet);
+
+gasChoice = 'Methane';                      % Gas to be modelled                      
+gasFind = (data(:,1)== gases(gasChoice));   % Creates a logical matrix with all rows that match the gas choice
+data = data(gasFind,(1:10));                % Uses the new matrix to rezise the data to only include the selected gas
+
+if ~exist('gasData','var')
+    load(strcat(pwd,'\GasData\SpectraPlot'),'gasData')
+end
+spectraPlot = gasData;
 
 
 %Goes Through each .mat file in the GasData fodler
 %and combines them vertically to obtain one single .mat 
 %file for all the gases in the HITRAN databse
 
-folderspec = strcat(pwd,'\GasData');
-myFiles = dir(fullfile(folderspec,'*.mat'));
-N = natsortfiles({myFiles.name});
-C = cell(1,numel(N));
-
-for k = 1: numel(N)
-T = load(fullfile(folderspec,N{k}));
-C(k) = struct2cell(T);
-end
-GasTransitions = vertcat(C{:});
-save('gasTransitions','GasTransitions')
+% folderspec = strcat(pwd,'\GasData');
+% myFiles = dir(fullfile(folderspec,'*.mat'));
+% N = natsortfiles({myFiles.name});
+% C = cell(1,numel(N));
+% 
+% for k = 1: numel(N)
+% T = load(fullfile(folderspec,N{k}));
+% C(k) = struct2cell(T);
+% end
+% GasTransitions = vertcat(C{:});
+% save('gasTransitions','GasTransitions')
 
 
 numIso = max(data(:,2));            % Number of isotopologues in the gas file
@@ -178,7 +178,7 @@ simpleEmpirical = sum(voigtFinal1);
 humlicek = sum(voigtFinal2);
 
 figure('units','normalized','outerposition',[0 0 1 1])
-plot(v(1,:),mcleans)
+plot(v(1,:),humlicek)
 title("All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd)
 xlabel("Frequency, cm-1")
 ylabel("Absorbance, -ln(I/Io)")
