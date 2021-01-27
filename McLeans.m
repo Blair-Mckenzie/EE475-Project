@@ -17,6 +17,8 @@ keySet = {'Water','Carbon Dioxide','Ozone','Nitrogen Oxide','Carbon Monoxide','M
 valueSet = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 31 32 33 34 36 37 39 40 41 43 44 45 46 47 48 49 53];
 gases = containers.Map(keySet,valueSet);
 
+
+
 gasChoice = 'Methane';                      % Gas to be modelled                      
 gasFind = (data(:,1)== gases(gasChoice));   % Creates a logical matrix with all rows that match the gas choice
 data = data(gasFind,(1:10));                % Uses the new matrix to rezise the data to only include the selected gas
@@ -185,30 +187,30 @@ mcleans = sum(voigtFinal);
 simpleEmpirical = sum(voigtFinal1);
 humlicek = sum(abs(voigtFinal2));
 
-figure('units','normalized','outerposition',[0 0 1 1])
-plot(v(1,:),humlicek)
-title("All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd)
-xlabel("Frequency, cm-1")
-ylabel("Absorbance, -ln(I/Io)")
-grid on
-
-figure('units','normalized','outerposition',[0 0 1 1])
-plot(v(1,:),mcleans)
-title("All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd)
-xlabel("Frequency, cm-1")
-ylabel("Absorbance, -ln(I/Io)")
-grid on
-
-figure('units','normalized','outerposition',[0 0 1 1])
-yyaxis left
-plot(v(1,:),humlicek);
-title("Humlicek vs Mcleans for range " + vStart + " to " + vEnd)
-xlabel("Frequency, cm-1")
-ylabel("Absorbance, (I/Io)")
-grid on
-yyaxis right
-plot(v(1,:),mcleans)
-legend('Humlicek','Mcleans Model');
+% figure('units','normalized','outerposition',[0 0 1 1])
+% plot(v(1,:),humlicek)
+% title("All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd)
+% xlabel("Frequency, cm-1")
+% ylabel("Absorbance, -ln(I/Io)")
+% grid on
+% 
+% figure('units','normalized','outerposition',[0 0 1 1])
+% plot(v(1,:),mcleans)
+% title("All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd)
+% xlabel("Frequency, cm-1")
+% ylabel("Absorbance, -ln(I/Io)")
+% grid on
+% 
+% figure('units','normalized','outerposition',[0 0 1 1])
+% yyaxis left
+% plot(v(1,:),humlicek);
+% title("Humlicek vs Mcleans for range " + vStart + " to " + vEnd)
+% xlabel("Frequency, cm-1")
+% ylabel("Absorbance, (I/Io)")
+% grid on
+% yyaxis right
+% plot(v(1,:),mcleans)
+% legend('Humlicek','Mcleans Model');
 
 % figure('units','normalized','outerposition',[0 0 1 1])
 % yyaxis left
@@ -243,4 +245,4 @@ legend('Humlicek','Mcleans Model');
 % plot(v(1,:),spectraPlot)
 % legend('Simple Empirical Approximation','SpectraPlot Model');
 
-% GUI(gases)
+GUI(GasTransitions,gases)
