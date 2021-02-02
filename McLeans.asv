@@ -1,6 +1,7 @@
 clc
 close all
-clearvars -except GasTransitions gasData   
+clearvars -except GasTransitions gasData 
+%partitions  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Reading in Gas data
@@ -42,6 +43,7 @@ spectraPlot = gasData;
 % GasTransitions = vertcat(C{:});
 % save('gasTransitions','GasTransitions')
 
+
 numIso = max(data(:,2));            % Number of isotopologues in the gas file
 isoChoice = 1;                      % Isotopologue(s) to be looked at
 isoFind = (data(:,2 )== isoChoice); 
@@ -50,26 +52,23 @@ data = data(isoFind,(1:10));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Reading in Partion data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% if ~exist('tempdata','var')
+    partFilePath = strcat(pwd,'\GasData\',gasChoice,num2str(isoChoice),'.txt');
+    fid = fopen(partFilePath);
+    formatSpec  = '%4f %16f %*[^\n]';
+    st0 = textscan(fid,formatSpec);
+    fclose(fid);
+    partitions = cell2mat(st0);
+% end
 
-partFilePath = strcat(pwd,'\GasData\',gasChoice,num2str(isoChoice),'.txt');
-fid = fopen(partFilePath);
-formatSpec  = '%4f %16f %*[^\n]';
-st0 = textscan(fid,formatSpec);
-fclose(fid);
-partitions = cell2mat(st0);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Reading in Gas Mass data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 filePath = strcat(pwd,'\GasData\molparam.txt');
 fid = fopen(filePath);
 g0 = textscan(fid,formatSpec);
 fclose(fid);
 masses = cell2mat(g0);
 
-massFind= (masses == gases(gasChoice));
-masses = masses(massFind,(1:2));
-masses(:,1) = [];
+mass= (masses == gases(gasChoice));
+masses = masses(massFind,(:,2) );
 
 vStart = 6291;                      % Start of frequency range to be looked at 
 vEnd = 6293;                        % End of frequency range to be looked at 
@@ -83,7 +82,7 @@ dataSize = size(data,1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 c = 299792458;                      % Speed of light (cm-1)
 c2 = 1.4387769;                     % Second radiation constant 
-M = masses(isoChoice);              % Molecular mass of gas
+M = 16.04;                          % Molecular mass of methane
 T0 = 296;                           % Reference temperature(Kelvin)
 T = 1000;                           % Temperature of system (Kelvin)
 P = 1;                              % Pressure of system (Atmosphere)

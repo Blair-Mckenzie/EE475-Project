@@ -11,8 +11,7 @@ lblTitle = uilabel(fig,'Position',[425,875,500,50]);
 lblTitle.Text = "GUI for modelling Molecular Spectra";
 lblTitle.FontSize = 20;
 
-ax= uiaxes(fig,'Position',[100,100,1050,750]);
-ax.GridLineStyle='-';
+ax = uiaxes(fig,'Position',[100,100,1050,750]);
 
 lblModelType = uilabel(fig,'Position',[1300,785,250,50]);
 lblModelType.Text = "Model Type";
@@ -138,7 +137,7 @@ T = editTemp.Value;
 P = editPressure.Value;
 concentration = editConcentration.Value;
 pLength = editPLength.Value;
-step = 500;
+step = 5000;
 
 [X,voigtFinal] = deal(zeros(dataSize,step));
 v = repmat(linspace(vStart,vEnd,step),dataSize,1);
@@ -192,6 +191,11 @@ mcleans = sum(voigtFinal);
 
 x = v(1,:);
 y = mcleans;
+ax.XGrid='on';
+ax.YGrid='on';
+ax.Title.String = "All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd;
+ax.YLabel.String = 'Absorbance, (I/Io)';
+ax.XLabel.String = 'Frequency, cm-1';
 plot(ax,x,y);
 
 end
