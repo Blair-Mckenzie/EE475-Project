@@ -81,14 +81,16 @@ dataSize = size(data,1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Declaring Constants 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-c = 299792458;                      % Speed of light (cm-1)
-c2 = 1.4387769;                     % Second radiation constant 
+c = 299792458e2;                    % Speed of light (cm-1)
+h = 6.626e-34;                      % Planck constant
+k = 1.38064852e-23;                 % Boltzmann constant
+c2 = (h*c)/k;                       % Second radiation constant 
 M = masses(isoChoice);              % Molecular mass of gas
 T0 = 296;                           % Reference temperature(Kelvin)
 T = 1000;                           % Temperature of system (Kelvin)
 P = 1;                              % Pressure of system (Atmosphere)
 concentration = 0.02;               % Concentration
-pLength = 1;                        % Length
+pLength = 1;                        % Length of cell(cm)
 step = 500;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -103,8 +105,8 @@ totalContribution = zeros(1,step);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 v0 = data(:,3);                 % Transition wavenumber
 S_t0 = data(:,4);               % Line Intensity
-gammaAir = data(:,6);           % Air broadened HWHM 
-gammaSelf = data(:,7);          % Self broadened HWHM
+gammaAir = data(:,6).*(T0/T).^data(:,8);           % Air broadened HWHM 
+gammaSelf = data(:,7).*(T0/T).^data(:,8);          % Self broadened HWHM
 n = data(:,8);                  % Temperature dependent coefficient for air broadened HWHM(Lorentzian)
 pShift = data(:,9);             % Pressure Shift induced by air
 E_lower = data(:,10);           % Lower State Energy
@@ -121,16 +123,16 @@ C = [-0.3085, 0.5906, -0.3085, 0.5906];
 D = [0.021, -1.1858, -0.021, 1.1858];
 
 %Returns Gaussian FWHM
-gammaG = (v0.*7.1623e-7.*sqrt(T/M))';
+gammaG = (v0.*7.1623e-7.*(T/M).^0.5)';
 
 %Gives the Lorentzian FWHM
-gammaL = ((2*P).*(((concentration.*gammaSelf).*(T0/T).^n) + ((1-concentration).*gammaAir).*(T0/T).^n))';
+gammaL = ((2*P).*((concentration.*gammaSelf)+ ((1-concentration).*gammaAir)))';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Calculating Voigt Lineshape 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Voigt HWHM approximation
-gammaV =  (0.5346*gammaL + sqrt(0.2166*gammaL.^2+gammaG.^2)./2);
+gammaV =  (0.5346.*gammaL + sqrt(0.2166.*gammaL.^2+gammaG.^2)./2);
 %Lorentzian and Gaussian HWHMs
 sigmaL = gammaL./2;
 sigmaG = gammaG ./2 ;
@@ -148,8 +150,6 @@ sigma = 1.5;
 
 % x_k = [ 0.314240376254359 0.947788391240164 1.597682635152605 2.279507080501060 3.020637025120890 3.889724897869782];
 % w_k = [ 0.5701352362625 0.2604923102642 0.5160798561588 0.3905390584629 0.8573687043588 0.2658551684356];
-
-
 x_k = [-3.889724897869782 -3.020637025120890 -2.279507080501060 -1.597682635152605 -0.947788391240164 -0.314240376254359 0.314240376254359 0.947788391240164 1.597682635152605 2.279507080501060 3.020637025120890 3.889724897869782];
 w_k = [-0.2658551684356 -0.8573687043588 -0.3905390584629 -0.5160798561588 -0.2604923102642 -0.5701352362625 0.5701352362625 0.2604923102642 0.5160798561588 0.3905390584629 0.8573687043588 0.2658551684356];
 
@@ -163,10 +163,8 @@ for k = 1:dataSize
     % x for humlicek voigt 
      x(k,:) = (2*sqrt(log(2))./sigmaG(k)).*(v(k,:)-v0(k)')-(P.*pShift(k));
      
-    
     %empirical expression to approximate the Voigt function 
     simpleApprox(k,:) = ( (c_L(k) .* 1/pi) .* (gammaV(k)./(v(k,:)-v0(k).^2) + gammaV(k).^2) ) + c_G(k) .* (sqrt(log(2))./ sqrt(pi) .* gammaV(k) ) .* exp( (-log(2).*(v(k,:)-v0(k)).^2 ) ./ (gammaV(k).^2) ) ;
-%     approx(k,:) = (1.2891.*(0.5138 + X(k,:)) + 0.5 .*(1.0324 + Y(k)) ) ./ ( (0.5138+ X(k,:)).^2 + (0.5138 + Y(k)).^2 );
     
     for kk = 1:n
         a_k = -1*(1/pi)*w_k(kk)*exp(sigma^2)*sin(2*x_k(kk)*sigma);
@@ -186,9 +184,7 @@ for k = 1:dataSize
     tempLineStrength(k) = S_t0(k) .*( (Q_tref/Q_t) .* (exp(-c2.*E_lower(k)./T) ./ exp(-c2.*E_lower(k)./T0)) .* ( (1-exp(-c2.*v0(k)./T)) ./(1-exp(-c2.*v0(k)./T0))));
     voigtFinal(k,:) =  2*P*concentration*pLength.*gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*sum(Vxy(:,:,k)');
     voigtFinal1(k,:) =  2*P*concentration*pLength.*gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*(simpleApprox(k,:));
-    voigtFinal2(k,:) =  2*P*concentration*pLength.*gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*(humlicekApprox(k,:));
-%     voigtFinal3(k,:) =  2*P*concentration*pLength.*gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*(approx(k,:));
-    
+    voigtFinal2(k,:) =  2*P*concentration*pLength.*gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*(humlicekApprox(k,:));  
 end
 
 mcleans = sum(voigtFinal);
@@ -202,12 +198,12 @@ humlicek = sum(abs(voigtFinal2));
 % ylabel("Absorbance, -ln(I/Io)")
 % grid on
 % 
-% figure('units','normalized','outerposition',[0 0 1 1])
-% plot(v(1,:),mcleans)
-% title("All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd)
-% xlabel("Frequency, cm-1")
-% ylabel("Absorbance, -ln(I/Io)")
-% grid on
+figure('units','normalized','outerposition',[0 0 1 1])
+plot(v(1,:),mcleans)
+title("All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd)
+xlabel("Frequency, cm-1")
+ylabel("Absorbance, -ln(I/Io)")
+grid on
 % 
 % figure('units','normalized','outerposition',[0 0 1 1])
 % yyaxis left
