@@ -5,7 +5,6 @@ data = Transitions;
 tempData = Transitions;
 
 fig = uifigure('Visible','off','Position',[200 50 1600 950]);
-% fig.CloseRequestFcn = @(fig,event)my_closereq(fig);
 
 lblTitle = uilabel(fig,'Position',[425,875,500,50]);
 lblTitle.Text = "GUI for modelling Molecular Spectra";
@@ -23,7 +22,6 @@ lblGasSelect.Text = "Select Gas";
 ddGasSelect = uidropdown(fig,'Position',[1300,675,250,50]);
 ddGasSelect.Items = keys(Gases);
 gasChoice = ddGasSelect.Value;
-% gasChoice = getappdata(ddGasSelect,'gasChoice');
 gasFind = (tempData(:,1)== Gases(gasChoice));
 tempData = tempData(gasFind,(1:10));
 
@@ -31,11 +29,14 @@ lblIsotopologueSelect = uilabel(fig,'Position',[1300,635,250,50]);
 lblIsotopologueSelect.Text = "Select Isotopologue";
 ddIsotopologueSelect = uidropdown(fig,'Position',[1300,600,250,50]);
 
+% lBoxIsotopologueSelect = uilistbox(fig,...
+%     'Position',[1300,600,250,50]);
+% lBoxIsotopologueSelect.Multiselect = 'on';
+
 numIso = max(tempData(:,2));            
 ddIsotopologueSelect.Items = sprintfc('%01d',1:numIso);
 
 ddGasSelect.ValueChangedFcn = @(dd,event)DropDownGasChanged(ddGasSelect,ddIsotopologueSelect,Transitions,Gases);
-
 
 % numIso = max(Transitions(:,2));            
 % ddIsotopologueSelect.Items = 1:1:numIso;
@@ -73,14 +74,12 @@ editPressure = uieditfield(fig,'numeric','Position',[1300,300,250,50],...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','on');
 
-
 lblConcentration = uilabel(fig,'Position',[1300,260,250,50]);
 lblConcentration.Text = "Concentration";
 editConcentration = uieditfield(fig,'numeric','Position',[1300,225,250,50],...
     'Limits',[0,Inf],...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','on');
-
 
 lblPLength = uilabel(fig,'Position',[1300,185,250,50]);
 lblPLength.Text = "Path Length (cm)";
@@ -122,6 +121,16 @@ st0 = textscan(fid,formatSpec);
 fclose(fid);
 partitions = cell2mat(st0);
 
+filePath = strcat(pwd,'\GasData\molparam.txt');
+fid = fopen(filePath);
+g0 = textscan(fid,formatSpec);
+fclose(fid);
+masses = cell2mat(g0);
+
+massFind= (masses == gases(gasChoice));
+masses = masses(massFind,(1:2));
+masses(:,1) = [];
+
 vStart = editFrequencyStart.Value;
 vEnd = editFrequencyEnd.Value;
 
@@ -131,7 +140,7 @@ dataSize = size(data,1);
 
 % c = 299792458;                    % Speed of light (cm-1)
 c2 = 1.4387769;                     % Second radiation constant 
-M = 16.04;                          % Molecular mass of methane
+M = masses(isoChoice);              % Molecular mass of selected gas
 T0 = 296;                           % Reference temperature(Kelvin)
 T = editTemp.Value;
 P = editPressure.Value;
