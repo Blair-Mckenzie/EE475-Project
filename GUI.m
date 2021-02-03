@@ -147,6 +147,7 @@ v = repmat(linspace(vStart,vEnd,step),dataSize,1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 v0 = data(:,3);                 % Transition wavenumber
 S_t0 = data(:,4);               % Line Intensity
+S_t0 = (7.339e21.*S_t0)./T;     % Conversition to useful units for line strength
 gammaAir = data(:,6);           % Air broadened HWHM 
 gammaSelf = data(:,7);          % Self broadened HWHM
 n = data(:,8);                  % Temperature dependent coefficient for air broadened HWHM(Lorentzian)

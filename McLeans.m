@@ -91,7 +91,7 @@ T = 1000;                           % Temperature of system (Kelvin)
 P = 1;                              % Pressure of system (Atmosphere)
 concentration = 0.02;               % Concentration
 pLength = 1;                        % Length of cell(cm)
-step = 500;
+step = 200;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Allocating size of arrays 
@@ -105,6 +105,7 @@ totalContribution = zeros(1,step);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 v0 = data(:,3);                 % Transition wavenumber
 S_t0 = data(:,4);               % Line Intensity
+S_t0 = (7.339e21.*S_t0)./T;
 gammaAir = data(:,6).*(T0/T).^data(:,8);           % Air broadened HWHM 
 gammaSelf = data(:,7).*(T0/T).^data(:,8);          % Self broadened HWHM
 n = data(:,8);                  % Temperature dependent coefficient for air broadened HWHM(Lorentzian)
@@ -216,16 +217,16 @@ grid on
 % plot(v(1,:),mcleans)
 % legend('Humlicek','Mcleans Model');
 
-% figure('units','normalized','outerposition',[0 0 1 1])
-% yyaxis left
-% plot(v(1,:),mcleans)
-% title("Mcleans against SpectraPlot for range " + vStart + " to " + vEnd +" cm-1")
-% xlabel("Frequency, cm-1")
-% ylabel("Absorbance, (I/Io)")
-% grid on
-% yyaxis right
-% plot(v(1,:),spectraPlot)
-% legend('Mcleans Model','SpectraPlot Model');
+figure('units','normalized','outerposition',[0 0 1 1])
+yyaxis left
+plot(v(1,:),mcleans)
+title("Mcleans against SpectraPlot for range " + vStart + " to " + vEnd +" cm-1")
+xlabel("Frequency, cm-1")
+ylabel("Absorbance, (I/Io)")
+grid on
+yyaxis right
+plot(v(1,:),spectraPlot)
+legend('Mcleans Model','SpectraPlot Model');
 
 % figure('units','normalized','outerposition',[0 0 1 1])
 % yyaxis left
