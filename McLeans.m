@@ -124,7 +124,7 @@ for k = 1:dataSize
     end
 
     temperatureDependentLineStrength(k) = S_t0(k) .*( (Q_tref/Q_t) .* (exp(-c2.*E_lower(k)./T) ./ exp(-c2.*E_lower(k)./T0)) .* ( (1-exp(-c2.*v0(k)./T)) ./(1-exp(-c2.*v0(k)./T0))));
-    voigtFinal(k,:) =  2*P*concentration*pLength.*gammaG(k).*temperatureDependentLineStrength(k).*sqrt(log(2)/pi).*sum(Vxy(:,:,k)');
+    voigtFinal(k,:) =  2*P*concentration*pLength./gammaG(k).*temperatureDependentLineStrength(k).*sqrt(log(2)/pi).*sum(Vxy(:,:,k)');
 end
 
 mcleans = sum(voigtFinal);

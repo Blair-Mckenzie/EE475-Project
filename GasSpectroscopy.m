@@ -29,6 +29,8 @@ spectraPlot = gasData;
 load('MethaneSpectraPlot','spectra1650')
 MethaneSpectra = spectra1650;
 
+spectra1650nm = csvread('C:\Users\Blair\Downloads\SpectraPlotSim1\spectra.csv');
+
 
 %Goes Through each .mat file in the GasData fodler
 %and combines them vertically to obtain one single .mat 
@@ -47,10 +49,9 @@ MethaneSpectra = spectra1650;
 % save('gasTransitions','GasTransitions')
 
 numIso = max(data(:,2));            % Number of isotopologues in the gas file
-isoChoice = 1;                      % Isotopologue(s) to be looked at
-isoFind = (data(:,2 )== isoChoice); 
+isoChoice = [1 2 3 4];              % Isotopologue(s) to be looked at
+isoFind = (data(:,2 )== isoChoice);
 data = data(isoFind,(1:10));
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Reading in Partion data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -75,8 +76,11 @@ massFind= (masses == gases(gasChoice));
 masses = masses(massFind,(1:2));
 masses(:,1) = [];
 
-vStart = 1650;                      % Start of frequency range to be looked at 
-vEnd = 1652;                        % End of frequency range to be looked at 
+% vStart = 6053;                      % Start of frequency range to be looked at 
+% vEnd = 6060;                        % End of frequency range to be looked at 
+
+vStart = 6291;
+vEnd = 6293;
 
 vFind = (data(:,3) >= vStart & data(:,3) <= vEnd);
 data = data(vFind,(1:10));
@@ -95,7 +99,7 @@ T = 1000;                           % Temperature of system (Kelvin)
 P = 1;                              % Pressure of system (Atmosphere)
 concentration = 0.02;               % Concentration
 pLength = 1;                        % Length of cell(cm)
-step = 200;
+step = 700;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Allocating size of arrays 
@@ -171,6 +175,8 @@ for k = 1:dataSize
     %empirical expression to approximate the Voigt function 
     simpleApprox(k,:) = ( (c_L(k) .* 1/pi) .* (gammaV(k)./(v(k,:)-v0(k).^2) + gammaV(k).^2) ) + c_G(k) .* (sqrt(log(2))./ sqrt(pi) .* gammaV(k) ) .* exp( (-log(2).*(v(k,:)-v0(k)).^2 ) ./ (gammaV(k).^2) ) ;
     
+    vf = real(fadf(x(k,:)+ 1i.*y(k)));
+    
     for kk = 1:n
         a_k = -1*(1/pi)*w_k(kk)*exp(sigma^2)*sin(2*x_k(kk)*sigma);
         b_k = (1/pi)*w_k(kk)*exp(sigma^2) * cos(2*x_k(kk)*sigma);
@@ -187,7 +193,7 @@ for k = 1:dataSize
     phiV(k,:) = (2*sqrt(log(2))./ gammaG(k).*sqrt(pi)).* sum(Vxy(:,:,k)');
 
     tempLineStrength(k) = S_t0(k) .*( (Q_tref/Q_t) .* (exp(-c2.*E_lower(k)./T) ./ exp(-c2.*E_lower(k)./T0)) .* ( (1-exp(-c2.*v0(k)./T)) ./(1-exp(-c2.*v0(k)./T0))));
-    voigtFinal(k,:) =  2*P*concentration*pLength.*gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*sum(Vxy(:,:,k)');
+    voigtFinal(k,:) =  2*P*concentration*pLength./gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*sum(Vxy(:,:,k)');
     voigtFinal1(k,:) =  2*P*concentration*pLength.*gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*(simpleApprox(k,:));
     voigtFinal2(k,:) =  2*P*concentration*pLength.*gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*(humlicekApprox(k,:));  
 end
@@ -221,17 +227,17 @@ grid on
 % plot(v(1,:),mcleans)
 % legend('Humlicek','Mcleans Model');
 
-figure('units','normalized','outerposition',[0 0 1 1])
-yyaxis left
-plot(v(1,:),mcleans)
-title("Mcleans against SpectraPlot for range " + vStart + " to " + vEnd +" cm-1")
-xlabel("Frequency, cm-1")
-ylabel("Absorbance, (I/Io)")
-grid on
+% figure('units','normalized','outerposition',[0 0 1 1])
+% % yyaxis left
+% plot(v(1,:),mcleans)
+% title("Mcleans against SpectraPlot for range " + vStart + " to " + vEnd +" cm-1")
+% xlabel("Frequency, cm-1")
+% ylabel("Absorbance, (I/Io)")
+% grid on
 % hold on
-yyaxis right
-plot(v(1,:),MethaneSpectra)
-legend('Mcleans Model','SpectraPlot Model');
+% % yyaxis right
+% plot(v(1,:),vf)
+% legend('Mcleans Model','VF');
 
 % figure('units','normalized','outerposition',[0 0 1 1])
 % yyaxis left
