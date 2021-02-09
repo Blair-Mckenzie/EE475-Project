@@ -214,6 +214,11 @@ end
 
 mcleans = sum(voigtFinal{1});
 mcleans1 = sum(voigtFinal{3});
+for n = 1: isoSize
+   if(isempty(voigtFinal{n}))
+       fprintf('No absorbance for isotopolgue: %d in: %s  \n',isoChoice(n),gasChoice)   
+   end
+end
 % simpleEmpirical = sum(voigtFinal1);
 % humlicek = sum(abs(voigtFinal2));
 
