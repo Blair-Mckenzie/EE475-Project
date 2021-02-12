@@ -143,30 +143,8 @@ gammaL{n} = ((2*P).*((concentration.*gammaSelf{n})+ ...         % Calculates the
 Y{n} = (gammaL{n}.*sqrt(log(2)))./gammaG{n};                    % Calculating Y for Voigt lineshape  
 end
 
-% for n = 1:isoSize
-%     for k = 1:dataSize(n)
-%         %Calculating X for Voigt lineshape
-%         X{n}(k,:) = (2*sqrt(log(2))./gammaG{n}(k)).*(v{n}(k,:)-v0{n}(k)')-(P.*pShift{n}(k));  
-%         
-%         for index = 1:4
-%             Vxy{n}(:,index,k) = ((C(index).*(Y{n}(k)-A(index)))+D(index).*(X{n}(k,:)-B(index))) ./ ((Y{n}(k)-A(index)).^2 + (X{n}(k,:)-B(index)).^2);
-%         end
-% 
-%         % Voigt Line shape function
-%         % phiV(k,:) = (2*sqrt(log(2))./ gammaG(k).*sqrt(pi)).* sum(Vxy(:,:,k)');
-% 
-%         tempLineStrength{n}(k) = S_t0{n}(k) .*( (Q_tref(n)/Q_t(n)) .* (exp(-c2.*E_lower{n}(k)./T) ./ exp(-c2.*E_lower{n}(k)./T0))...
-%         .* ( (1-exp(-c2.*v0{n}(k)./T)) ./(1-exp(-c2.*v0{n}(k)./T0))));
-%         voigtFinal{n}(k,:) =  2*P*concentration*pLength./gammaG{n}(k).*tempLineStrength{n}(k).*sqrt(log(2)/pi).*sum(Vxy{n}(:,:,k)');
-%     end
-% end
-    %     voigtFinal1(k,:) =  2*P*concentration*pLength.*gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*(simpleApprox(k,:));
-    %     voigtFinal2(k,:) =  2*P*concentration*pLength.*gammaG(k).*tempLineStrength(k).*sqrt(log(2)/pi).*(humlicekApprox(k,:));  
-
 voigtFinal = Mcleans(isoSize,dataSize,gammaG,v,v0,P,pShift,Y,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength);
-
 voigtFinal1 = Simple_Empirical(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P);
-
 voigtFinal2 = Kielkopf(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P,pShift);
 
 mcleans = sum(voigtFinal{1});
@@ -175,14 +153,11 @@ mcleans1 = sum(voigtFinal{3});
 simpleEmpirical = sum(voigtFinal1{1});
 kielkopf = sum(voigtFinal2{1});
 
-
 for n = 1: isoSize
    if(isempty(voigtFinal{n}))
        fprintf('No absorbance for isotopolgue: %d in: %s  \n',isoChoice(n),gasChoice)   
    end
 end
-
-% humlicek = sum(abs(voigtFinal2));
 
 figure('units','normalized','outerposition',[0 0 1 1])
 yyaxis left

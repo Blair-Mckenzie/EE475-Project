@@ -1,12 +1,7 @@
 function kielkopfApprox = Kielkopf(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P,pShift)
 [kiel,kielkopfApprox,tempLineStrength,eta,betaL,betaG,y,x,xh,Gx,Ex,Lx,vf] = deal(cell(1,isoSize));
-% b0 = 0.47047;
-% b1 = 0.61686;
-% b2 =-0.16994;
-% b3 = 1.32554
-% C1 = 1.0692;
-% C2 = 0.86639;
-% C3 = 1;
+% b0 = 0.47047; % b1 = 0.61686;% b2 =-0.16994;% b3 = 1.32554
+% C1 = 1.0692;% C2 = 0.86639;% C3 = 1;
 epsilon = 0.0990;
 for n = 1:isoSize
     betaL{n} = gammaL{n}./2;
