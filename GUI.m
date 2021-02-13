@@ -12,31 +12,30 @@ lblTitle.FontSize = 20;
 
 ax = uiaxes(fig,'Position',[100,100,1050,750]);
 
-lblModelType = uilabel(fig,'Position',[1300,785,250,50]);
-lblModelType.Text = "Model Type";
-ddModelType = uidropdown(fig,'Position',[1300,750,250,50]);    
-ddModelType.Items = {'Mcleans','Simple Empirical','Humlicek'};
+lblModelType = uilabel(fig,'Position',[1300,835,250,50]);
+lblModelType.Text = "Approximation";
+ddModelType = uidropdown(fig,'Position',[1300,800,250,50]);    
+ddModelType.Items = {'Mcleans','Simple Empirical','Kielkopf'};
 
-lblGasSelect = uilabel(fig,'Position',[1300,710,250,50]);
+lblGasSelect = uilabel(fig,'Position',[1300,760,250,50]);
 lblGasSelect.Text = "Select Gas";
-ddGasSelect = uidropdown(fig,'Position',[1300,675,250,50]);
+ddGasSelect = uidropdown(fig,'Position',[1300,725,250,50]);
 ddGasSelect.Items = keys(Gases);
 gasChoice = ddGasSelect.Value;
 gasFind = (tempData(:,1)== Gases(gasChoice));
 tempData = tempData(gasFind,(1:10));
 
-lblIsotopologueSelect = uilabel(fig,'Position',[1300,635,250,50]);
+lblIsotopologueSelect = uilabel(fig,'Position',[1300,685,250,50]);
 lblIsotopologueSelect.Text = "Select Isotopologue";
-ddIsotopologueSelect = uidropdown(fig,'Position',[1300,600,250,50]);
+% ddIsotopologueSelect = uidropdown(fig,'Position',[1300,600,250,50]);
 
-% lBoxIsotopologueSelect = uilistbox(fig,...
-%     'Position',[1300,600,250,50]);
-% lBoxIsotopologueSelect.Multiselect = 'on';
-
+lBoxIsotopologueSelect = uilistbox(fig,...
+    'Position',[1300,600,250,100],...
+    'Multiselect','on');
 numIso = max(tempData(:,2));            
-ddIsotopologueSelect.Items = sprintfc('%01d',1:numIso);
+lBoxIsotopologueSelect.Items = sprintfc('%01d',1:numIso);
 
-ddGasSelect.ValueChangedFcn = @(dd,event)DropDownGasChanged(ddGasSelect,ddIsotopologueSelect,Transitions,Gases);
+ddGasSelect.ValueChangedFcn = @(dd,event)DropDownGasChanged(ddGasSelect,lBoxIsotopologueSelect,Transitions,Gases);
 
 % numIso = max(Transitions(:,2));            
 % ddIsotopologueSelect.Items = 1:1:numIso;

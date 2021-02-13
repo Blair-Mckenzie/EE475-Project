@@ -55,12 +55,9 @@ for n = 1: isoSize
     isoFind = (tempdata(:,2 )== isoChoice(n));
     data{n} = tempdata(isoFind,(1:10));
 end
-% data = data(isoFind,(1:10));
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Reading in Partion data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 partitions = cell(1,isoSize);
 for n = 1: length(isoChoice)
 partFilePath = strcat(pwd,'\GasData\',gasChoice,num2str(isoChoice(n)),'.txt');
@@ -70,7 +67,6 @@ st0 = textscan(fid,formatSpec);
 fclose(fid);
 partitions{n} = cell2mat(st0);
 end
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Reading in Gas Mass data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -86,7 +82,6 @@ masses(:,1) = [];
 
 % vStart = 6053;                      % Start of frequency range to be looked at 
 % vEnd = 6060;                        % End of frequency range to be looked at 
-
 vStart = 6291;
 vEnd = 6293;
 
@@ -96,7 +91,6 @@ vFind = (data{n}(:,3) >= vStart & data{n}(:,3) <= vEnd);
 data{n} = data{n}(vFind,(1:10));
 dataSize(n) = size(data{n},1);
 end
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Declaring Constants 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -110,16 +104,13 @@ T = 1000;                           % Temperature of system (Kelvin)
 P = 1;                              % Pressure of system (Atmosphere)
 concentration = 0.0001;               % Concentration
 pLength = 1;                        % Length of cell(cm)
-step = 500;                         % Number of data points in wavelength 
-
+step = 5000;                         % Number of data points in wavelength 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Allocating size of cell arrays and matrices
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% [x,X,phiV,simpleApprox,humlicekApprox,voigtFinal,voigtFinal1,voigtFinal2] = deal(zeros(dataSize,step));
 [v,v0,S_t0,gammaAir,gammaSelf,pShift,E_lower,gammaG,gammaL,Y,X,Vxy,tempLineStrength] = deal(cell(1,isoSize));
 [Q_tref,Q_t] = deal(zeros(1,isoSize));
 [Q_tref_temp,Q_t_temp] = deal(zeros(1,2,isoSize));
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % HITRAN Data  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -159,16 +150,16 @@ for n = 1: isoSize
    end
 end
 
-figure('units','normalized','outerposition',[0 0 1 1])
-yyaxis left
-plot(v{1}(1,:),kielkopf)
-title("All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd)
-xlabel("Frequency, cm-1")
-ylabel("Absorbance, -ln(I/Io)")
-grid on
-yyaxis right
-plot(v{1}(1,:),mcleans)
-legend('Kielkopf','Mcleans Model');
+% figure('units','normalized','outerposition',[0 0 1 1])
+% yyaxis left
+% plot(v{1}(1,:),kielkopf)
+% title("All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd)
+% xlabel("Frequency, cm-1")
+% ylabel("Absorbance, -ln(I/Io)")
+% grid on
+% yyaxis right
+% plot(v{1}(1,:),mcleans)
+% legend('Kielkopf','Mcleans Model');
  
 % figure('units','normalized','outerposition',[0 0 1 1])
 % plot(v{1}(1,:),mcleans)
@@ -203,16 +194,16 @@ legend('Kielkopf','Mcleans Model');
 % plot(v(1,:),vf)
 % legend('Mcleans Model','VF');
 
-figure('units','normalized','outerposition',[0 0 1 1])
-yyaxis left
-plot(v{1}(1,:),simpleEmpirical);
-title("Simple empirical approximation vs Mcleans for range " + vStart + " to " + vEnd)
-xlabel("Frequency, cm-1")
-ylabel("Absorbance, (I/Io)")
-grid on
-yyaxis right
-plot(v{1}(1,:),mcleans)
-legend('Simple Empirical approxiamtion','Mcleans Model');
+% figure('units','normalized','outerposition',[0 0 1 1])
+% yyaxis left
+% plot(v{1}(1,:),simpleEmpirical);
+% title("Simple empirical approximation vs Mcleans for range " + vStart + " to " + vEnd)
+% xlabel("Frequency, cm-1")
+% ylabel("Absorbance, (I/Io)")
+% grid on
+% yyaxis right
+% plot(v{1}(1,:),mcleans)
+% legend('Simple Empirical approxiamtion','Mcleans Model');
  
 % figure('units','normalized','outerposition',[0 0 1 1])
 % plot(v{1}(1,:),mcleans)
@@ -224,4 +215,4 @@ legend('Simple Empirical approxiamtion','Mcleans Model');
 % plot(v{1}(1,:),spectraPlot)
 % legend('Mcleans Approximation','SpectraPlot Model');
 
-% GUI(GasTransitions,gases)
+GUI(GasTransitions,gases)

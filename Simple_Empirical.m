@@ -20,7 +20,7 @@ for n = 1:isoSize
         .* gammaV{n}(k) ) .* exp( (-log(2).*(v{n}(k,:)-v0{n}(k)).^2 ) ./ (gammaV{n}(k).^2) ) ;
         tempLineStrength{n}(k) = S_t0{n}(k) .*( (Q_tref(n)/Q_t(n)) .* (exp(-c2.*E_lower{n}(k)./T) ./ exp(-c2.*E_lower{n}(k)./T0))...
         .* ( (1-exp(-c2.*v0{n}(k)./T)) ./(1-exp(-c2.*v0{n}(k)./T0))));
-        simpleApprox{n}(k,:) =  2*P*concentration*pLength./gammaG{n}(k).*tempLineStrength{n}(k).*sqrt(log(2)/pi).*(approx{n}(k,:));
+        simpleApprox{n}(k,:) =  2*P*concentration*pLength./sigmaG{n}(k).*tempLineStrength{n}(k).*sqrt(log(2)/pi).*(approx{n}(k,:));
     end
     
 end
