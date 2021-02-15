@@ -47,108 +47,108 @@ spectra1650nm = csvread('C:\Users\Blair\Downloads\SpectraPlotSim1\spectra.csv');
 % save('gasTransitions','GasTransitions')
 
 
-numIso = max(tempdata(:,2));            % Number of isotopologues in the gas file (useful for GUI)
-isoChoice = [1 2 3 4];                  % Isotopologue(s) to be looked at
-isoSize = length(isoChoice);            % Size if isoChoice martix
-data = cell(1,isoSize);                 
-for n = 1: isoSize
-    isoFind = (tempdata(:,2 )== isoChoice(n));
-    data{n} = tempdata(isoFind,(1:10));
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Reading in Partion data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-partitions = cell(1,isoSize);
-for n = 1: length(isoChoice)
-partFilePath = strcat(pwd,'\GasData\',gasChoice,num2str(isoChoice(n)),'.txt');
-fid = fopen(partFilePath);
-formatSpec  = '%4f %16f %*[^\n]';
-st0 = textscan(fid,formatSpec);
-fclose(fid);
-partitions{n} = cell2mat(st0);
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Reading in Gas Mass data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-filePath = strcat(pwd,'\GasData\molparam.txt');
-fid = fopen(filePath);
-g0 = textscan(fid,formatSpec);
-fclose(fid);
-masses = cell2mat(g0);
-
-massFind= (masses == gases(gasChoice));
-masses = masses(massFind,(1:2));
-masses(:,1) = [];
-
-% vStart = 6053;                      % Start of frequency range to be looked at 
-% vEnd = 6060;                        % End of frequency range to be looked at 
-vStart = 6291;
-vEnd = 6293;
-
-dataSize = zeros (1,isoSize);
-for n = 1: isoSize
-vFind = (data{n}(:,3) >= vStart & data{n}(:,3) <= vEnd);
-data{n} = data{n}(vFind,(1:10));
-dataSize(n) = size(data{n},1);
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Declaring Constants 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-c = 299792458e2;                    % Speed of light (cm-1)
-h = 6.626e-34;                      % Planck constant
-k = 1.38064852e-23;                 % Boltzmann constant
-c2 = (h*c)/k;                       % Second radiation constant
-M = masses(isoChoice);              % Molecular mass of the selected gas
-T0 = 296;                           % Reference temperature(Kelvin)
-T = 1000;                           % Temperature of system (Kelvin)
-P = 1;                              % Pressure of system (Atmosphere)
-concentration = 0.0001;               % Concentration
-pLength = 1;                        % Length of cell(cm)
-step = 5000;                         % Number of data points in wavelength 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Allocating size of cell arrays and matrices
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[v,v0,S_t0,gammaAir,gammaSelf,pShift,E_lower,gammaG,gammaL,Y,X,Vxy,tempLineStrength] = deal(cell(1,isoSize));
-[Q_tref,Q_t] = deal(zeros(1,isoSize));
-[Q_tref_temp,Q_t_temp] = deal(zeros(1,2,isoSize));
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% HITRAN Data  
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-for n = 1: isoSize
-v{n} = repmat(linspace(vStart,vEnd,step),dataSize(n),1);
-v0{n} = data{n}(:,3);                                           % Transition wavenumber
-S_t0{n} = data{n}(:,4);                                         % Line Intensity
-S_t0{n} = (7.339e21.*S_t0{n})./T;                               % Line Intensity Conversion
-gammaAir{n} = data{n}(:,6).*(T0/T).^data{n}(:,8);               % Air broadened HWHM 
-gammaSelf{n} = data{n}(:,7).*(T0/T).^data{n}(:,8);              % Self broadened HWHM
-% n = data(:,8);                                                % Temperature dependent coefficient for air broadened HWHM(Lorentzian)
-pShift{n} = data{n}(:,9);                                       % Pressure Shift induced by air
-E_lower{n} = data{n}(:,10);                                     % Lower State Energy
-Q_tref_temp(:,:,n) = partitions{n}(T0,:);
-Q_tref(n) = Q_tref_temp(n*2);                                   % 
-Q_t_temp(:,:,n) = partitions{n}(T,:);
-Q_t(n) = Q_t_temp(n*2);                                         % 
-gammaG{n} = (v0{n}.*7.1623e-7.*(T/M(n)).^0.5)';                 % Calculates the Gaussian FWHM
-gammaL{n} = ((2*P).*((concentration.*gammaSelf{n})+ ...         % Calculates the Lorentzian FWHM
-((1-concentration).*gammaAir{n})))';     
-Y{n} = (gammaL{n}.*sqrt(log(2)))./gammaG{n};                    % Calculating Y for Voigt lineshape  
-end
-
-voigtFinal = Mcleans(isoSize,dataSize,gammaG,v,v0,P,pShift,Y,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength);
-voigtFinal1 = Simple_Empirical(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P);
-voigtFinal2 = Kielkopf(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P,pShift);
-
-mcleans = sum(voigtFinal{1});
-mcleans1 = sum(voigtFinal{3});
-
-simpleEmpirical = sum(voigtFinal1{1});
-kielkopf = sum(voigtFinal2{1});
-
-for n = 1: isoSize
-   if(isempty(voigtFinal{n}))
-       fprintf('No absorbance for isotopolgue: %d in: %s  \n',isoChoice(n),gasChoice)   
-   end
-end
+% numIso = max(tempdata(:,2));            % Number of isotopologues in the gas file (useful for GUI)
+% isoChoice = [1 2 3 4];                  % Isotopologue(s) to be looked at
+% isoSize = length(isoChoice);            % Size if isoChoice martix
+% data = cell(1,isoSize);                 
+% for n = 1: isoSize
+%     isoFind = (tempdata(:,2 )== isoChoice(n));
+%     data{n} = tempdata(isoFind,(1:10));
+% end
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % Reading in Partion data
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% partitions = cell(1,isoSize);
+% for n = 1: length(isoChoice)
+% partFilePath = strcat(pwd,'\GasData\',gasChoice,num2str(isoChoice(n)),'.txt');
+% fid = fopen(partFilePath);
+% formatSpec  = '%4f %16f %*[^\n]';
+% st0 = textscan(fid,formatSpec);
+% fclose(fid);
+% partitions{n} = cell2mat(st0);
+% end
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % Reading in Gas Mass data
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% filePath = strcat(pwd,'\GasData\molparam.txt');
+% fid = fopen(filePath);
+% g0 = textscan(fid,formatSpec);
+% fclose(fid);
+% masses = cell2mat(g0);
+% 
+% massFind= (masses == gases(gasChoice));
+% masses = masses(massFind,(1:2));
+% masses(:,1) = [];
+% 
+% % vStart = 6053;                      % Start of frequency range to be looked at 
+% % vEnd = 6060;                        % End of frequency range to be looked at 
+% vStart = 6291;
+% vEnd = 6293;
+% 
+% dataSize = zeros (1,isoSize);
+% for n = 1: isoSize
+% vFind = (data{n}(:,3) >= vStart & data{n}(:,3) <= vEnd);
+% data{n} = data{n}(vFind,(1:10));
+% dataSize(n) = size(data{n},1);
+% end
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % Declaring Constants 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% c = 299792458e2;                    % Speed of light (cm-1)
+% h = 6.626e-34;                      % Planck constant
+% k = 1.38064852e-23;                 % Boltzmann constant
+% c2 = (h*c)/k;                       % Second radiation constant
+% M = masses(isoChoice);              % Molecular mass of the selected gas
+% T0 = 296;                           % Reference temperature(Kelvin)
+% T = 1000;                           % Temperature of system (Kelvin)
+% P = 1;                              % Pressure of system (Atmosphere)
+% concentration = 0.0001;               % Concentration
+% pLength = 1;                        % Length of cell(cm)
+% step = 5000;                         % Number of data points in wavelength 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % Allocating size of cell arrays and matrices
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% [v,v0,S_t0,gammaAir,gammaSelf,pShift,E_lower,gammaG,gammaL,Y,X,Vxy,tempLineStrength] = deal(cell(1,isoSize));
+% [Q_tref,Q_t] = deal(zeros(1,isoSize));
+% [Q_tref_temp,Q_t_temp] = deal(zeros(1,2,isoSize));
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % HITRAN Data  
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% for n = 1: isoSize
+% v{n} = repmat(linspace(vStart,vEnd,step),dataSize(n),1);
+% v0{n} = data{n}(:,3);                                           % Transition wavenumber
+% S_t0{n} = data{n}(:,4);                                         % Line Intensity
+% S_t0{n} = (7.339e21.*S_t0{n})./T;                               % Line Intensity Conversion
+% gammaAir{n} = data{n}(:,6).*(T0/T).^data{n}(:,8);               % Air broadened HWHM 
+% gammaSelf{n} = data{n}(:,7).*(T0/T).^data{n}(:,8);              % Self broadened HWHM
+% % n = data(:,8);                                                % Temperature dependent coefficient for air broadened HWHM(Lorentzian)
+% pShift{n} = data{n}(:,9);                                       % Pressure Shift induced by air
+% E_lower{n} = data{n}(:,10);                                     % Lower State Energy
+% Q_tref_temp(:,:,n) = partitions{n}(T0,:);
+% Q_tref(n) = Q_tref_temp(n*2);                                   % 
+% Q_t_temp(:,:,n) = partitions{n}(T,:);
+% Q_t(n) = Q_t_temp(n*2);                                         % 
+% gammaG{n} = (v0{n}.*7.1623e-7.*(T/M(n)).^0.5)';                 % Calculates the Gaussian FWHM
+% gammaL{n} = ((2*P).*((concentration.*gammaSelf{n})+ ...         % Calculates the Lorentzian FWHM
+% ((1-concentration).*gammaAir{n})))';     
+% Y{n} = (gammaL{n}.*sqrt(log(2)))./gammaG{n};                    % Calculating Y for Voigt lineshape  
+% end
+% 
+% voigtFinal = Mcleans(isoSize,dataSize,gammaG,v,v0,P,pShift,Y,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength);
+% voigtFinal1 = Simple_Empirical(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P);
+% voigtFinal2 = Kielkopf(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P,pShift);
+% 
+% mcleans = sum(voigtFinal{1});
+% mcleans1 = sum(voigtFinal{3});
+% 
+% simpleEmpirical = sum(voigtFinal1{1});
+% kielkopf = sum(voigtFinal2{1});
+% 
+% for n = 1: isoSize
+%    if(isempty(voigtFinal{n}))
+%        fprintf('No absorbance for isotopolgue: %d in: %s  \n',isoChoice(n),gasChoice)   
+%    end
+% end
 
 % figure('units','normalized','outerposition',[0 0 1 1])
 % yyaxis left
