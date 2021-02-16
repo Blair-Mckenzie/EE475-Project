@@ -1,8 +1,6 @@
 function simpleApprox = Simple_Empirical(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P)
 [approx,simpleApprox,tempLineStrength,d,c_L,c_G,gammaV,sigmaL,sigmaG] = deal(cell(1,isoSize));
-C1 = 1.0692;
-C2 = 0.86639;
-C3 = 1;
+
 for n = 1:isoSize
     sigmaL{n} = gammaL{n}./2;
     sigmaG{n} = gammaG{n} ./2 ;
@@ -13,7 +11,6 @@ for n = 1:isoSize
     c_G{n} = 0.32460 - 0.61825 .*d{n} + 0.17681.*d{n}.^2 + 0.12109.*d{n}.^3;
 end
 
-
 for n = 1:isoSize
     for k = 1:dataSize(n)
         approx{n}(k,:) = ( (c_L{n}(k) .* 1/pi) .* (gammaV{n}(k)./(v{n}(k,:)-v0{n}(k).^2) + gammaV{n}(k).^2) ) + c_G{n}(k) .* (sqrt(log(2))./ sqrt(pi)...
@@ -22,9 +19,7 @@ for n = 1:isoSize
         .* ( (1-exp(-c2.*v0{n}(k)./T)) ./(1-exp(-c2.*v0{n}(k)./T0))));
         simpleApprox{n}(k,:) =  2*P*concentration*pLength./sigmaG{n}(k).*tempLineStrength{n}(k).*sqrt(log(2)/pi).*(approx{n}(k,:));
     end
-    
 end
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

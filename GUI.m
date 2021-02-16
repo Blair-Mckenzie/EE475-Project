@@ -104,6 +104,7 @@ function DropDownGasChanged(ddGasSelect,ddIsotopologueSelect,data,Gases)
 end
 
 function plotButtonPress(fig,ax,tempdata,Gases,ddModelType,ddGasSelect,lBoxIsotopologueSelect,editFrequencyStart,editFrequencyEnd,editTemp,editPressure,editConcentration,editPLength)
+ax.NextPlot = 'replace';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Resizing data to match selected gas
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -169,7 +170,7 @@ step = 5000;                                    % Number of data points in wavel
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Allocating size of cell arrays and matrices
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[v,v0,S_t0,gammaAir,gammaSelf,pShift,E_lower,gammaG,gammaL,Y,finalApprox,y] = deal(cell(1,isoSize));
+[v,v0,S_t0,gammaAir,gammaSelf,pShift,E_lower,gammaG,gammaL,Y,y] = deal(cell(1,isoSize));
 [Q_tref,Q_t] = deal(zeros(1,isoSize));
 [Q_tref_temp,Q_t_temp] = deal(zeros(1,2,isoSize));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -210,10 +211,9 @@ ax.YGrid='on';
 ax.Title.String = "All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd;
 ax.YLabel.String = 'Absorbance, (I/Io)';
 ax.XLabel.String = 'Frequency, cm-1';
-
+ax.NextPlot = 'add';
 isoList = zeros(1,isoSize);
 for n = 1: isoSize
-    finalApprox{n} = sum(voigtFinal{n});
      if(isempty(voigtFinal{n}))
          isoList(n) = n;  
      end
@@ -227,14 +227,12 @@ text = sprintf(formatSpec,isoList,gasChoice);
 absorbanceEmptyLbl.Text = text;
 
 x = v{1}(1,:);
-abs = finalApprox{1};
-plot(ax,x,abs);
-hold on
-
-for n = 2: isoSize
-    y{n} = finalApprox{n}; 
+approx = voigtFinal(~cellfun('isempty',voigtFinal));
+finalApprox = cell(1,length(approx));
+for n = 1: length(approx)
+    finalApprox{n} = sum(approx{n});
+    y{n} = finalApprox{n};
     plot(ax,x,y{n});
 end
-
 end
 

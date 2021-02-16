@@ -83,7 +83,7 @@ spectra1650nm = csvread('C:\Users\Blair\Downloads\SpectraPlotSim1\spectra.csv');
 % % vStart = 6053;                      % Start of frequency range to be looked at 
 % % vEnd = 6060;                        % End of frequency range to be looked at 
 % vStart = 6291;
-% vEnd = 6293;
+% vEnd = 6295;
 % 
 % dataSize = zeros (1,isoSize);
 % for n = 1: isoSize
@@ -139,11 +139,11 @@ spectra1650nm = csvread('C:\Users\Blair\Downloads\SpectraPlotSim1\spectra.csv');
 % voigtFinal2 = Kielkopf(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P,pShift);
 % 
 % mcleans = sum(voigtFinal{1});
-% mcleans1 = sum(voigtFinal{3});
+% % mcleans1 = sum(voigtFinal{3});
 % 
 % simpleEmpirical = sum(voigtFinal1{1});
 % kielkopf = sum(voigtFinal2{1});
-% 
+
 % for n = 1: isoSize
 %    if(isempty(voigtFinal{n}))
 %        fprintf('No absorbance for isotopolgue: %d in: %s  \n',isoChoice(n),gasChoice)   
