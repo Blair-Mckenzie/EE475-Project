@@ -1,3 +1,7 @@
+% Works reasonably well for large Y
+% For y = 1 relative error is less than 1*10e-2
+% For y = 0.001 the relative eror reaches almost 10
+
 function mcleans = Mcleans(isoSize,dataSize,gammaG,v,v0,P,pShift,Y,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength)
 %Mclean's Coefficients
 A = [-1.215, -1.3509, -1.215, -1.3509];

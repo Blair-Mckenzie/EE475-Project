@@ -104,7 +104,7 @@ function DropDownGasChanged(ddGasSelect,ddIsotopologueSelect,data,Gases)
 end
 
 function plotButtonPress(fig,ax,tempdata,Gases,ddModelType,ddGasSelect,lBoxIsotopologueSelect,editFrequencyStart,editFrequencyEnd,editTemp,editPressure,editConcentration,editPLength)
-ax.NextPlot = 'replace';
+% ax.NextPlot = 'replaceall';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Resizing data to match selected gas
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,3 +1,6 @@
+% Max width error of 0.55% at d = 0.1
+% Error is 0.0118% or 0.01% at d = -+0.54
+
 function simpleApprox = Simple_Empirical(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P)
 [approx,simpleApprox,tempLineStrength,d,c_L,c_G,gammaV,sigmaL,sigmaG] = deal(cell(1,isoSize));
 

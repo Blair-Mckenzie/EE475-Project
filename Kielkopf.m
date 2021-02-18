@@ -1,3 +1,5 @@
+% Eroor of 1*10e-4 relative to peak value 
+
 function kielkopfApprox = Kielkopf(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P,pShift)
 [kiel,kielkopfApprox,tempLineStrength,eta,betaL,betaG,y,x,xh,Gx,Ex,Lx] = deal(cell(1,isoSize));
 % b0 = 0.47047; % b1 = 0.61686;% b2 =-0.16994;% b3 = 1.32554
