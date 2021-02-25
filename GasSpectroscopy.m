@@ -80,8 +80,8 @@ massFind= (masses == gases(gasChoice));
 masses = masses(massFind,(1:2));
 masses(:,1) = [];
 
-vStart = 6056;                      % Start of frequency range to be looked at 
-vEnd = 6058;                        % End of frequency range to be looked at 
+vStart = 6055;                      % Start of frequency range to be looked at 
+vEnd = 6059;                        % End of frequency range to be looked at 
 % vStart = 6291;
 % vEnd = 6300;
 
