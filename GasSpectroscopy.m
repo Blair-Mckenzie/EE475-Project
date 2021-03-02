@@ -80,10 +80,11 @@ massFind= (masses == gases(gasChoice));
 masses = masses(massFind,(1:2));
 masses(:,1) = [];
 
-vStart = 6055;                      % Start of frequency range to be looked at 
-vEnd = 6059;                        % End of frequency range to be looked at 
-% vStart = 6291;
-% vEnd = 6300;
+
+% vStart = 6055;                      % Start of frequency range to be looked at 
+% vEnd = 6059;                        % End of frequency range to be looked at 
+vStart = 6291;
+vEnd = 6293;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Declaring Constants 
@@ -102,7 +103,7 @@ step = 500;                         % Number of data points in wavelength
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Allocating size of cell arrays and matrices
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[v,v0,S_t0,gammaAir,gammaSelf,pShift,E_lower,gammaG,gammaL,Y,X,Vxy,tempLineStrength] = deal(cell(1,isoSize));
+[v,v0,S_t0,gammaAir,gammaSelf,pShift,E_lower,gammaG,gammaL,Y,X,Vxy,tempLineStrength,phiL,phiG,result,voigtFinal3] = deal(cell(1,isoSize));
 [Q_tref,Q_t] = deal(zeros(1,isoSize));
 [Q_tref_temp,Q_t_temp] = deal(zeros(1,2,isoSize));
 
@@ -117,17 +118,27 @@ S_t0{n} = data{n}(:,4);                                         % Line Intensity
 S_t0{n} = (7.339e21.*S_t0{n})./T;                               % Line Intensity Conversion
 gammaAir{n} = data{n}(:,6).*(T0/T).^data{n}(:,8);               % Air broadened HWHM 
 gammaSelf{n} = data{n}(:,7).*(T0/T).^data{n}(:,8);              % Self broadened HWHM
-% n = data(:,8);                                                % Temperature dependent coefficient for air broadened HWHM(Lorentzian)
 pShift{n} = data{n}(:,9);                                       % Pressure Shift induced by air
 E_lower{n} = data{n}(:,10);                                     % Lower State Energy
 Q_tref_temp(:,:,n) = partitions{n}(T0,:);
-Q_tref(n) = Q_tref_temp(n*2);                                   % 
+Q_tref(n) = Q_tref_temp(n*2);                                   
 Q_t_temp(:,:,n) = partitions{n}(T,:);
-Q_t(n) = Q_t_temp(n*2);                                         % 
+Q_t(n) = Q_t_temp(n*2);                                         
 gammaG{n} = (v0{n}.*7.1623e-7.*(T/M(n)).^0.5)';                 % Calculates the Gaussian FWHM
 gammaL{n} = ((2*P).*((concentration.*gammaSelf{n})+ ...         % Calculates the Lorentzian FWHM
-((1-concentration).*gammaAir{n})))';     
-Y{n} = (gammaL{n}.*sqrt(log(2)))./gammaG{n};                    % Calculating Y for Voigt lineshape  
+((1-concentration).*gammaAir{n})))';
+Y{n} = (gammaL{n}.*sqrt(log(2)))./gammaG{n};                    % Calculating Y for Voigt lineshape
+
+    for k = 1:dataSize(n)
+            %Calculating X for Voigt lineshape
+            phiL{n}(k,:) = 1/pi.*( (gammaL{n}(k)./2) ./ ( (v{n}(k,:)-v0{n}(k)).^2 + (gammaL{n}(k)./2).^2 ) ) ;
+            phiG{n}(k,:) = (2./gammaG{n}(k)) .* (sqrt(log(2)/pi)) .* exp(-4*log(2).*((v{n}(k,:)-v0{n}(k))./(gammaG{n}(k)./2) ).^2);
+            result{n}(k,:) = conv(phiL{n}(k,:),phiG{n}(k,:),'same');
+            tempLineStrength{n}(k) = S_t0{n}(k) .*( (Q_tref(n)/Q_t(n)) .* (exp(-c2.*E_lower{n}(k)./T) ./ exp(-c2.*E_lower{n}(k)./T0))...
+        .* ( (1-exp(-c2.*v0{n}(k)./T)) ./(1-exp(-c2.*v0{n}(k)./T0))));
+            voigtFinal3{n}(k,:) = 2*P*concentration*pLength./gammaG{n}(k).*tempLineStrength{n}(k).*sqrt(log(2)/pi).*result{n}(k,:); 
+            X{n}(k,:) = (2*sqrt(log(2))./gammaG{n}(k)).*(v{n}(k,:)-v0{n}(k)')-(P.*pShift{n}(k));
+    end
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -142,10 +153,14 @@ voigtFinal1 = Simple_Empirical(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q
 voigtFinal2 = Kielkopf(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P,pShift);
 
 mcleans = sum(voigtFinal{1});
+finalAbsorption = sum(voigtFinal3{1});
 % % mcleans1 = sum(voigtFinal{3});
 
 % simpleEmpirical = sum(voigtFinal1{1});
 kielkopf = sum(voigtFinal2{1});
+difference = PercentageDifference(mcleans,kielkopf);
+% diff = conv(mcleans,kielkopf,'same');
+% con = conv( X{1}(1,:),Y{1},'same');
 
 % for n = 1: isoSize
 %    if(isempty(voigtFinal{n}))
@@ -155,15 +170,25 @@ kielkopf = sum(voigtFinal2{1});
 
 figure('units','normalized','outerposition',[0 0 1 1])
 yyaxis left
-plot(v{1}(1,:),kielkopf)
+plot(v{1}(1,:),kielkopf,'r',v{1}(1,:),mcleans,'b')
 title("All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd)
 xlabel("Frequency, cm-1")
 ylabel("Absorbance, -ln(I/Io)")
 grid on
 yyaxis right
+ylabel("% Difference")
+plot(v{1}(1,:),difference)
+legend('Kielkopf','Mcleans Model','Percentage difference');
+
+
+figure('units','normalized','outerposition',[0 0 1 1])
+yyaxis left
+plot(v{1}(1,:),finalAbsorption)
+grid on
+yyaxis right
 plot(v{1}(1,:),mcleans)
-legend('Kielkopf','Mcleans Model');
- 
+legend('Convolution','Mcleans')
+
 % figure('units','normalized','outerposition',[0 0 1 1])
 % plot(v{1}(1,:),mcleans)
 % title("All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd)

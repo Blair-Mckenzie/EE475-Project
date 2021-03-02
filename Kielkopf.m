@@ -1,12 +1,10 @@
-% Eroor of 1*10e-4 relative to peak value 
+% Error of 1*10e-4 relative to peak value 
 
 function kielkopfApprox = Kielkopf(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P,pShift)
 [kiel,kielkopfApprox,tempLineStrength,eta,betaL,betaG,y,x,xh,Gx,Lx,K0y,t] = deal(cell(1,isoSize));
 a1 = 0.254829592; a2 = -0.284496736;
 a3 = 1.421413741; a4 = -1.453152027;
 a5 = 1.061405429; p=0.3275911;
-% k1 = 0.8029; k2 = -0.4207;
-% k3 = 0.2030; k4 = 0.07335;
 epsilon = 0.0990;
 for n = 1:isoSize
     betaL{n} = gammaL{n};
@@ -17,10 +15,8 @@ for n = 1:isoSize
     t{n} = 1./(1+p.*y{n});
     K0y{n} = a1*t{n} + a2*t{n}.^2 + a3*t{n}.^3 + a4*t{n}.^4 + a5*t{n}.^5;
 end
-
 for n = 1:isoSize
     for k = 1:dataSize(n)
-         % x for humlicek voigt 
          x{n}(k,:) = (2*sqrt(log(2))./betaG{n}(k)).*(v{n}(k,:)-v0{n}(k)')-(P.*pShift{n}(k));
          Gx{n}(k,:) = exp(-log(2).*( (x{n}(k,:)) ./xh{n}(k)).^2);
          Lx{n}(k,:) = 1./(1+((x{n}(k,:))./xh{n}(k)).^2);
@@ -30,7 +26,6 @@ for n = 1:isoSize
          kielkopfApprox{n}(k,:) =  2*P*concentration*pLength./betaG{n}(k).*tempLineStrength{n}(k).*sqrt(log(2)/pi).*(kiel{n}(k,:));
     end
 end
-
 
 end
 
