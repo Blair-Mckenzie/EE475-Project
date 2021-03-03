@@ -4,7 +4,7 @@ function GUI(Transitions,Gases)
 data = Transitions;
 tempData = Transitions;
 
-fig = uifigure('Visible','off','Position',[200 50 1600 950]);
+fig = uifigure('Visible','off','Position',[15 10 1900 1025]);
 
 lblTitle = uilabel(fig,'Position',[425,875,500,50]);
 lblTitle.Text = "GUI for modelling Molecular Spectra";
@@ -25,71 +25,92 @@ gasChoice = ddGasSelect.Value;
 gasFind = (tempData(:,1)== Gases(gasChoice));
 tempData = tempData(gasFind,(1:10));
 
-lblIsotopologueSelect = uilabel(fig,'Position',[1300,685,250,50]);
+lblIsotopologueSelect = uilabel(fig,'Position',[1600,835,250,50]);
 lblIsotopologueSelect.Text = "Select Isotopologue";
 
 lBoxIsotopologueSelect = uilistbox(fig,...
-    'Position',[1300,600,250,100],...
+    'Position',[1600,725,250,125],...
     'Multiselect','on');
 numIso = max(tempData(:,2));            
 lBoxIsotopologueSelect.Items = sprintfc('%01d',1:numIso);
 
 ddGasSelect.ValueChangedFcn = @(dd,event)DropDownGasChanged(ddGasSelect,lBoxIsotopologueSelect,Transitions,Gases);
 
-% numIso = max(Transitions(:,2));            
-% ddIsotopologueSelect.Items = 1:1:numIso;
-
-% isoChoice = 1;                     
-% isoFind = (data(:,2 )== isoChoice); 
-% data = data(isoFind,(1:10));
  maxFreq = 43410;
-lblFrequencyStart = uilabel(fig,'Position',[1300,560,250,50]);
+lblFrequencyStart = uilabel(fig,'Position',[1300,685,250,50]);
 lblFrequencyStart.Text = "Frequency Start (cm-1)";
-editFrequencyStart = uieditfield(fig,'numeric','Position',[1300,525,250,50],...
+editFrequencyStart = uieditfield(fig,'numeric','Position',[1300,650,250,50],...
     'Limits',[0,maxFreq],...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','on');
 
-lblFrequencyEnd = uilabel(fig,'Position',[1300,485,250,50]);
+
+lblFrequencyEnd = uilabel(fig,'Position',[1300,610,250,50]);
 lblFrequencyEnd.Text = "Frequency End (cm-1)";
-editFrequencyEnd = uieditfield(fig,'numeric','Position',[1300,450,250,50],...
+editFrequencyEnd = uieditfield(fig,'numeric','Position',[1300,575,250,50],...
     'Limits',[0,maxFreq],...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','off');
 
-lblTemp = uilabel(fig,'Position',[1300,410,250,50]);
+lblFrequencyStartNm = uilabel(fig,'Position',[1600,685,250,50]);
+lblFrequencyStartNm.Text = "Frequency Start (nm)";
+editFrequencyStartNm = uieditfield(fig,'numeric','Position',[1600,650,250,50],...
+    'Limits',[0,maxFreq],...
+    'LowerLimitInclusive','on',...
+    'UpperLimitInclusive','on');
+
+
+lblFrequencyEndNm = uilabel(fig,'Position',[1600,610,250,50]);
+lblFrequencyEndNm.Text = "Frequency End (nm)";
+editFrequencyEndNm = uieditfield(fig,'numeric','Position',[1600,575,250,50],...
+    'Limits',[0,maxFreq],...
+    'LowerLimitInclusive','on',...
+    'UpperLimitInclusive','off');
+
+editFrequencyStart.ValueChangedFcn = @(numfld,event)changeUnits(editFrequencyStartNm,editFrequencyStart);
+editFrequencyEnd.ValueChangedFcn = @(numfld,event)changeUnits(editFrequencyEndNm,editFrequencyEnd);
+editFrequencyStartNm.ValueChangedFcn = @(numfld,event)changeUnits(editFrequencyStart,editFrequencyStartNm);
+editFrequencyEndNm.ValueChangedFcn = @(numfld,event)changeUnits(editFrequencyEnd,editFrequencyEndNm);
+
+lblTemp = uilabel(fig,'Position',[1300,535,250,50]);
 lblTemp.Text = "Temperature (K)";
-editTemp = uieditfield(fig,'numeric','Position',[1300,375,250,50],...
+editTemp = uieditfield(fig,'numeric','Position',[1300,500,250,50],...
     'Limits',[1,3500],...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','on');
 
 
-lblPressure = uilabel(fig,'Position',[1300,335,250,50]);
+lblPressure = uilabel(fig,'Position',[1300,460,250,50]);
 lblPressure.Text = "Pressure (Atm)";
-editPressure = uieditfield(fig,'numeric','Position',[1300,300,250,50],...
+editPressure = uieditfield(fig,'numeric','Position',[1300,425,250,50],...
     'Limits',[0,Inf],...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','on');
 
-lblConcentration = uilabel(fig,'Position',[1300,260,250,50]);
+lblConcentration = uilabel(fig,'Position',[1600,535,250,50]);
 lblConcentration.Text = "Concentration";
-editConcentration = uieditfield(fig,'numeric','Position',[1300,225,250,50],...
+editConcentration = uieditfield(fig,'numeric','Position',[1600,500,250,50],...
     'Limits',[0,Inf],...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','on');
 
-lblPLength = uilabel(fig,'Position',[1300,185,250,50]);
+lblPLength = uilabel(fig,'Position',[1600,460,250,50]);
 lblPLength.Text = "Path Length (cm)";
-editPLength = uieditfield(fig,'numeric','Position',[1300,150,250,50],...
+editPLength = uieditfield(fig,'numeric','Position',[1600,425,250,50],...
     'Limits',[0,Inf],...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','on');
 
 plotButton = uibutton(fig,...
-'Position',[1300,110,150,30],...
+'Position',[1370,350,150,30],...
 'Text','Plot');
 plotButton.ButtonPushedFcn = @(btn,event)plotButtonPress(fig,ax,data,Gases,ddModelType,ddGasSelect,lBoxIsotopologueSelect,editFrequencyStart,editFrequencyEnd,editTemp,editPressure,editConcentration,editPLength); 
+
+clearButton = uibutton(fig,...
+'Position',[1550,350,150,30],...
+'Text','Clear Plot');
+clearButton.ButtonPushedFcn = @(btn,event)clearPlot(ax);
+
 fig.Visible = 'on';   
 
 end
@@ -101,6 +122,14 @@ function DropDownGasChanged(ddGasSelect,ddIsotopologueSelect,data,Gases)
     numIso = max(data(:,2));            
     ddIsotopologueSelect.Items = sprintfc('%01d',1:numIso);
     setappdata(ddGasSelect,'gasChoice',val);
+end
+
+function changeUnits(editFrequencyStart, editFrequencyStartNm)
+editFrequencyStart.Value = 1e7/editFrequencyStartNm.Value;
+end
+
+function clearPlot(ax)
+    cla(ax,'reset');
 end
 
 function plotButtonPress(fig,ax,tempdata,Gases,ddModelType,ddGasSelect,lBoxIsotopologueSelect,editFrequencyStart,editFrequencyEnd,editTemp,editPressure,editConcentration,editPLength)
@@ -146,6 +175,11 @@ masses(:,1) = [];
 
 vStart = editFrequencyStart.Value;
 vEnd = editFrequencyEnd.Value;
+if(vStart>vEnd)
+    temp = vEnd;
+    vEnd = vStart;
+    vStart = temp;
+end
 
 dataSize = zeros (1,isoSize);
 for n = 1: isoSize
@@ -212,6 +246,12 @@ ax.Title.String = "All voigt line shapes for " + gasChoice + " in the range " + 
 ax.YLabel.String = 'Absorbance, (I/Io)';
 ax.XLabel.String = 'Frequency, cm-1';
 ax.NextPlot = 'add';
+
+% lgd = ax.Legend;
+% set(lgd,'string',gasChoice);
+% legend(ax,label)
+% lgd = ax.Legend;
+% lgd = legend(gasChoice);
 isoList = zeros(1,isoSize);
 for n = 1: isoSize
      if(isempty(voigtFinal{n}))
@@ -231,8 +271,9 @@ approx = voigtFinal(~cellfun('isempty',voigtFinal));
 finalApprox = cell(1,length(approx));
 for n = 1: length(approx)
     finalApprox{n} = sum(approx{n});
-    y{n} = finalApprox{n};
-    plot(ax,x,y{n});
+    y{n} = finalApprox{n};   
+    plot(ax,x,y{n},'DisplayName',gasChoice);
+    legend(ax);
 end
 end
 
