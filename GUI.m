@@ -4,7 +4,10 @@ function GUI(Transitions,Gases)
 data = Transitions;
 tempData = Transitions;
 
+nimbus_laf = 'com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel';
+javax.swing.UIManager.setLookAndFeel(nimbus_laf);
 fig = uifigure('Visible','off','Position',[15 10 1900 1025]);
+% javax.swing.UIManager.setLookAndFeel(originalLnF);
 
 lblTitle = uilabel(fig,'Position',[425,875,500,50]);
 lblTitle.Text = "GUI for modelling Molecular Spectra";
@@ -102,17 +105,31 @@ editPLength = uieditfield(fig,'numeric','Position',[1600,425,250,50],...
     'UpperLimitInclusive','on');
 
 plotButton = uibutton(fig,...
-'Position',[1370,350,150,30],...
+'Position',[1370,325,150,30],...
 'Text','Plot');
-plotButton.ButtonPushedFcn = @(btn,event)plotButtonPress(fig,ax,data,Gases,ddModelType,ddGasSelect,lBoxIsotopologueSelect,editFrequencyStart,editFrequencyEnd,editTemp,editPressure,editConcentration,editPLength); 
+% handles.plotButton.UserData = 0 ;
 
 clearButton = uibutton(fig,...
-'Position',[1550,350,150,30],...
+'Position',[1550,325,150,30],...
 'Text','Clear Plot');
-clearButton.ButtonPushedFcn = @(btn,event)clearPlot(ax);
+clearButton.Enable = 'off';
 
-fig.Visible = 'on';   
+addPlotsButton = uibutton(fig,...
+    'Position',[1450,375,150,30],...
+    'Text','Sum Current Plots');
+addPlotsButton.Enable = 'off';
 
+numClicks = 0;
+guidata(fig,numClicks);
+
+addPlotsButton.ButtonPushedFcn = @(btn,event)sumCurrentPlots(fig,ax,plotButton,addPlotsButton);
+clearButton.ButtonPushedFcn = @(btn,event)clearPlot(fig,ax,clearButton,addPlotsButton,plotButton);
+
+plotButton.ButtonPushedFcn = @(btn,event)plotButtonPress(fig,ax,plotButton,addPlotsButton,...
+    clearButton,data,Gases,ddModelType,ddGasSelect,lBoxIsotopologueSelect,editFrequencyStart,...
+    editFrequencyEnd,editTemp,editPressure,editConcentration,editPLength); 
+
+fig.Visible = 'on';
 end
 
 function DropDownGasChanged(ddGasSelect,ddIsotopologueSelect,data,Gases)
@@ -128,152 +145,218 @@ function changeUnits(editFrequencyStart, editFrequencyStartNm)
 editFrequencyStart.Value = 1e7/editFrequencyStartNm.Value;
 end
 
-function clearPlot(ax)
+function clearPlot(fig,ax,clearButton,addPlotsButton,plotButton)
+    numClicks = guidata(fig);
+    numClicks = 0;
+    guidata(fig,numClicks); 
     cla(ax,'reset');
+    clearButton.Enable = 'off';
+    addPlotsButton.Enable = 'off';
+    plotButton.Enable = 'on';   
 end
 
-function plotButtonPress(fig,ax,tempdata,Gases,ddModelType,ddGasSelect,lBoxIsotopologueSelect,editFrequencyStart,editFrequencyEnd,editTemp,editPressure,editConcentration,editPLength)
-% ax.NextPlot = 'replaceall';
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Resizing data to match selected gas
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-gasChoice = ddGasSelect.Value;
-gasFind = (tempdata(:,1)== Gases(gasChoice));
-tempdata = tempdata(gasFind,(1:10));
-
-isoChoice = sort(str2double(lBoxIsotopologueSelect.Value));            % Isotopologue(s) to be looked at
-isoSize = length(isoChoice);                                           % Size of isoChoice martix
-data = cell(1,isoSize);                 
-for n = 1: isoSize
-    isoFind = (tempdata(:,2 )== isoChoice(n));
-    data{n} = tempdata(isoFind,(1:10));
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Reading in Partion data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-partitions = cell(1,isoSize);
-for n = 1: length(isoChoice)
-partFilePath = strcat(pwd,'\GasData\',gasChoice,num2str(isoChoice(n)),'.txt');
-fid = fopen(partFilePath);
-formatSpec  = '%4f %16f %*[^\n]';
-st0 = textscan(fid,formatSpec);
-fclose(fid);
-partitions{n} = cell2mat(st0);
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Reading in Gas Mass data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-filePath = strcat(pwd,'\GasData\molparam.txt');
-fid = fopen(filePath);
-g0 = textscan(fid,formatSpec);
-fclose(fid);
-masses = cell2mat(g0);
-
-massFind= (masses == Gases(gasChoice));
-masses = masses(massFind,(1:2));
-masses(:,1) = [];
-
-vStart = editFrequencyStart.Value;
-vEnd = editFrequencyEnd.Value;
-if(vStart>vEnd)
-    temp = vEnd;
-    vEnd = vStart;
-    vStart = temp;
+function sumCurrentPlots(fig,ax,plotButton,addPlotsButton)
+ numClicks = guidata(fig);    
+x = getappdata(fig,'xaxis');
+    plotData1 = getappdata(fig,'currentPlot1');
+    plotData2 = getappdata(fig,'currentPlot2');
+    plotData3 = getappdata(fig,'currentPlot3');
+    if(numClicks ==2)
+        newY = plotData1 + plotData2;
+    else
+        newY = plotData1 + plotData2 + plotData3;
+    end
+    plot(ax,x,newY,'DisplayName','Summation');
 end
 
-dataSize = zeros (1,isoSize);
-for n = 1: isoSize
-vFind = (data{n}(:,3) >= vStart & data{n}(:,3) <= vEnd);
-data{n} = data{n}(vFind,(1:10));
-dataSize(n) = size(data{n},1);
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Declaring Constants 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-c = 299792458e2;                                % Speed of light (cm-1)
-h = 6.626e-34;                                  % Planck constant
-k = 1.38064852e-23;                             % Boltzmann constant
-c2 = (h*c)/k;                                   % Second radiation constant
-T = editTemp.Value;                             % Temperature of system (Kelvin)
-T0 = 296;                                       % Temperature of system (Kelvin)
-P = editPressure.Value;                         % Pressure of system (Atmosphere)
-concentration = editConcentration.Value;        % Concentration
-pLength = editPLength.Value;                    % Length of cell(cm)
-M = masses(isoChoice);                          % Molecular mass of the selected gas
-step = 5000;                                    % Number of data points in wavelength 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Allocating size of cell arrays and matrices
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[v,v0,S_t0,gammaAir,gammaSelf,pShift,E_lower,gammaG,gammaL,Y,y] = deal(cell(1,isoSize));
-[Q_tref,Q_t] = deal(zeros(1,isoSize));
-[Q_tref_temp,Q_t_temp] = deal(zeros(1,2,isoSize));
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% HITRAN Data  
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-for n = 1: isoSize
-v{n} = repmat(linspace(vStart,vEnd,step),dataSize(n),1);
-v0{n} = data{n}(:,3);                                           % Transition wavenumber
-S_t0{n} = data{n}(:,4);                                         % Line Intensity
-S_t0{n} = (7.339e21.*S_t0{n})./T;                               % Line Intensity Conversion
-gammaAir{n} = data{n}(:,6).*(T0/T).^data{n}(:,8);               % Air broadened HWHM 
-gammaSelf{n} = data{n}(:,7).*(T0/T).^data{n}(:,8);              % Self broadened HWHM
-% n = data(:,8);                                                % Temperature dependent coefficient for air broadened HWHM(Lorentzian)
-pShift{n} = data{n}(:,9);                                       % Pressure Shift induced by air
-E_lower{n} = data{n}(:,10);                                     % Lower State Energy
-Q_tref_temp(:,:,n) = partitions{n}(T0,:);
-Q_tref(n) = Q_tref_temp(n*2);                                   % 
-Q_t_temp(:,:,n) = partitions{n}(T,:);
-Q_t(n) = Q_t_temp(n*2);                                         % 
-gammaG{n} = (v0{n}.*7.1623e-7.*(T/M(n)).^0.5)';                 % Calculates the Gaussian FWHM
-gammaL{n} = ((2*P).*((concentration.*gammaSelf{n})+ ...         % Calculates the Lorentzian FWHM
-((1-concentration).*gammaAir{n})))';     
-Y{n} = (gammaL{n}.*sqrt(log(2)))./gammaG{n};                    % Calculating Y for Voigt lineshape  
-end
+function plotButtonPress(fig,ax,plotButton,addPlotsButton,clearButton,tempdata,...
+    Gases,ddModelType,ddGasSelect,lBoxIsotopologueSelect,editFrequencyStart,...
+    editFrequencyEnd,editTemp,editPressure,editConcentration,editPLength)
+    
+clearButton.Enable = 'on';
+    numClicks = guidata(fig);
+    numClicks = numClicks + 1;
+    if(numClicks == 2)
+        addPlotsButton.Enable = 'on';
+    end
+    if(numClicks == 3)
+        plotButton.Enable = 'off';
+    end
+    guidata(fig,numClicks);
+    % handles.plotButton.UserData = handles.plotButton.UserData +1;
 
-approxSelect = ddModelType.Value;
-if(strcmp(approxSelect,'Mcleans'))
-    voigtFinal = Mcleans(isoSize,dataSize,gammaG,v,v0,P,pShift,Y,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength);
-elseif(strcmp(approxSelect,'Simple Empirical'))
-    voigtFinal = Simple_Empirical(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P);
-elseif(strcmp(approxSelect,'Kielkopf'))
-    voigtFinal = Kielkopf(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P,pShift);
-end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Resizing data to match selected gas
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    gasChoice = ddGasSelect.Value;
+    gasFind = (tempdata(:,1)== Gases(gasChoice));
+    tempdata = tempdata(gasFind,(1:10));
+
+    isoChoice = sort(str2double(lBoxIsotopologueSelect.Value));            % Isotopologue(s) to be looked at
+    isoSize = length(isoChoice);                                           % Size of isoChoice martix
+    data = cell(1,isoSize);                 
+    for n = 1: isoSize
+        isoFind = (tempdata(:,2 )== isoChoice(n));
+        data{n} = tempdata(isoFind,(1:10));
+    end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Reading in Partion data
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    partitions = cell(1,isoSize);
+    for n = 1: length(isoChoice)
+    partFilePath = strcat(pwd,'\GasData\',gasChoice,num2str(isoChoice(n)),'.txt');
+    fid = fopen(partFilePath);
+    formatSpec  = '%4f %16f %*[^\n]';
+    st0 = textscan(fid,formatSpec);
+    fclose(fid);
+    partitions{n} = cell2mat(st0);
+    end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Reading in Gas Mass data
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    filePath = strcat(pwd,'\GasData\molparam.txt');
+    fid = fopen(filePath);
+    g0 = textscan(fid,formatSpec);
+    fclose(fid);
+    masses = cell2mat(g0);
+
+    massFind= (masses == Gases(gasChoice));
+    masses = masses(massFind,(1:2));
+    masses(:,1) = [];
+
+    vStart = editFrequencyStart.Value;
+    vEnd = editFrequencyEnd.Value;
+    if(vStart>vEnd)
+        temp = vEnd;
+        vEnd = vStart;
+        vStart = temp;
+    end
+
+    dataSize = zeros (1,isoSize);
+    for n = 1: isoSize
+    vFind = (data{n}(:,3) >= vStart & data{n}(:,3) <= vEnd);
+    data{n} = data{n}(vFind,(1:10));
+    dataSize(n) = size(data{n},1);
+    end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Declaring Constants 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    c = 299792458e2;                                % Speed of light (cm-1)
+    h = 6.626e-34;                                  % Planck constant
+    k = 1.38064852e-23;                             % Boltzmann constant
+    c2 = (h*c)/k;                                   % Second radiation constant
+    T = editTemp.Value;                             % Temperature of system (Kelvin)
+    T0 = 296;                                       % Temperature of system (Kelvin)
+    P = editPressure.Value;                         % Pressure of system (Atmosphere)
+    concentration = editConcentration.Value;        % Concentration
+    pLength = editPLength.Value;                    % Length of cell(cm)
+    M = masses(isoChoice);                          % Molecular mass of the selected gas
+    step = 500;                                    % Number of data points in wavelength 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Allocating size of cell arrays and matrices
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    [v,v0,S_t0,gammaAir,gammaSelf,pShift,E_lower,gammaG,gammaL,Y,y] = deal(cell(1,isoSize));
+    [Q_tref,Q_t] = deal(zeros(1,isoSize));
+    [Q_tref_temp,Q_t_temp] = deal(zeros(1,2,isoSize));
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % HITRAN Data  
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    for n = 1: isoSize
+    v{n} = repmat(linspace(vStart,vEnd,step),dataSize(n),1);
+    v0{n} = data{n}(:,3);                                           % Transition wavenumber
+    S_t0{n} = data{n}(:,4);                                         % Line Intensity
+    S_t0{n} = (7.339e21.*S_t0{n})./T;                               % Line Intensity Conversion
+    gammaAir{n} = data{n}(:,6).*(T0/T).^data{n}(:,8);               % Air broadened HWHM 
+    gammaSelf{n} = data{n}(:,7).*(T0/T).^data{n}(:,8);              % Self broadened HWHM
+    % n = data(:,8);                                                % Temperature dependent coefficient for air broadened HWHM(Lorentzian)
+    pShift{n} = data{n}(:,9);                                       % Pressure Shift induced by air
+    E_lower{n} = data{n}(:,10);                                     % Lower State Energy
+    Q_tref_temp(:,:,n) = partitions{n}(T0,:);
+    Q_tref(n) = Q_tref_temp(n*2);                                   % 
+    Q_t_temp(:,:,n) = partitions{n}(T,:);
+    Q_t(n) = Q_t_temp(n*2);                                         % 
+    gammaG{n} = (v0{n}.*7.1623e-7.*(T/M(n)).^0.5)';                 % Calculates the Gaussian FWHM
+    gammaL{n} = ((2*P).*((concentration.*gammaSelf{n})+ ...         % Calculates the Lorentzian FWHM
+    ((1-concentration).*gammaAir{n})))';     
+    Y{n} = (gammaL{n}.*sqrt(log(2)))./gammaG{n};                    % Calculating Y for Voigt lineshape  
+    end
+
+    approxSelect = ddModelType.Value;
+    if(strcmp(approxSelect,'Mcleans'))
+        voigtFinal = Mcleans(isoSize,dataSize,gammaG,v,v0,P,pShift,Y,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength);
+    elseif(strcmp(approxSelect,'Simple Empirical'))
+        voigtFinal = Simple_Empirical(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P);
+    elseif(strcmp(approxSelect,'Kielkopf'))
+        voigtFinal = Kielkopf(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P,pShift);
+    end
 
 
-ax.XGrid='on';
-ax.YGrid='on';
-ax.Title.String = "All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd;
-ax.YLabel.String = 'Absorbance, (I/Io)';
-ax.XLabel.String = 'Frequency, cm-1';
-ax.NextPlot = 'add';
+    ax.XGrid='on';
+    ax.YGrid='on';
+    ax.Title.String = "All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd;
+    ax.YLabel.String = 'Absorbance, (I/Io)';
+    ax.XLabel.String = 'Frequency, cm-1';
+    ax.NextPlot = 'add';
 
-% lgd = ax.Legend;
-% set(lgd,'string',gasChoice);
-% legend(ax,label)
-% lgd = ax.Legend;
-% lgd = legend(gasChoice);
-isoList = zeros(1,isoSize);
-for n = 1: isoSize
-     if(isempty(voigtFinal{n}))
-         isoList(n) = n;  
-     end
-end
-isoList = isoList(isoList(1,:)~=0) ;
-absorbanceEmptyLbl = uilabel(fig,...
-    'Position', [75,75,500,30],...
-    'FontSize', 16);
-formatSpec = ['No absorbance for isotopolgue(s): ' repmat('%1.0f ,',1,numel(isoList)) ' in %s'];
-text = sprintf(formatSpec,isoList,gasChoice);
-absorbanceEmptyLbl.Text = text;
+    % lgd = ax.Legend;
+    % set(lgd,'string',gasChoice);
+    % legend(ax,label)
+    % lgd = ax.Legend;
+    % lgd = legend(gasChoice);
+    isoList = zeros(1,isoSize);
+    for n = 1: isoSize
+         if(isempty(voigtFinal{n}))
+             isoList(n) = n;  
+         end
+    end
+    isoList = isoList(isoList(1,:)~=0) ;
+    absorbanceEmptyLbl = uilabel(fig,...
+        'Position', [75,75,500,30],...
+        'FontSize', 16);
+    formatSpec = ['No absorbance for isotopolgue(s): ' repmat('%1.0f ,',1,numel(isoList)) ' in %s'];
+    text = sprintf(formatSpec,isoList,gasChoice);
+    absorbanceEmptyLbl.Text = text;
 
-x = v{1}(1,:);
-approx = voigtFinal(~cellfun('isempty',voigtFinal));
-finalApprox = cell(1,length(approx));
-for n = 1: length(approx)
-    finalApprox{n} = sum(approx{n});
-    y{n} = finalApprox{n};   
-    plot(ax,x,y{n},'DisplayName',gasChoice);
-    legend(ax);
-end
+    x = v{1}(1,:);
+    approx = voigtFinal(~cellfun('isempty',voigtFinal));
+    finalApprox = cell(1,length(approx));
+    for n = 1: length(approx)
+        finalApprox{n} = sum(approx{n});
+        y{n} = finalApprox{n};
+    end
+    setappdata(fig,'xaxis',x);
+    switch numClicks
+        case 1
+        if(length(finalApprox) >1)
+             out = sum(cell2mat(y'));
+             setappdata(fig,'currentPlot1',out);
+             plot(ax,x,out,'DisplayName',gasChoice);
+        else
+             setappdata(fig,'currentPlot1',y{1});
+             plot(ax,x,y{1},'DisplayName',gasChoice);
+        end
+        
+        case 2
+        if(length(finalApprox) >1)
+             out = sum(cell2mat(y'));
+             setappdata(fig,'currentPlot2',out);
+             plot(ax,x,out,'DisplayName',gasChoice);
+        else
+             setappdata(fig,'currentPlot2',y{1});
+             plot(ax,x,y{1},'DisplayName',gasChoice);
+        end
+        
+        case 3
+        if(length(finalApprox) >1)
+             out = sum(cell2mat(y'));
+             setappdata(fig,'currentPlot3',out);
+             plot(ax,x,out,'DisplayName',gasChoice);
+        else
+             setappdata(fig,'currentPlot3',y{1});
+             plot(ax,x,y{1},'DisplayName',gasChoice);
+        end
+            
+    end
+     legend(ax);
 end
 
