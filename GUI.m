@@ -4,10 +4,7 @@ function GUI(Transitions,Gases)
 data = Transitions;
 tempData = Transitions;
 
-nimbus_laf = 'com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel';
-javax.swing.UIManager.setLookAndFeel(nimbus_laf);
 fig = uifigure('Visible','off','Position',[15 10 1900 1025]);
-% javax.swing.UIManager.setLookAndFeel(originalLnF);
 
 lblTitle = uilabel(fig,'Position',[425,875,500,50]);
 lblTitle.Text = "GUI for modelling Molecular Spectra";
@@ -23,6 +20,7 @@ ddModelType.Items = {'Mcleans','Simple Empirical','Kielkopf'};
 lblGasSelect = uilabel(fig,'Position',[1300,760,250,50]);
 lblGasSelect.Text = "Select Gas";
 ddGasSelect = uidropdown(fig,'Position',[1300,725,250,50]);
+
 ddGasSelect.Items = keys(Gases);
 gasChoice = ddGasSelect.Value;
 gasFind = (tempData(:,1)== Gases(gasChoice));
@@ -39,36 +37,22 @@ lBoxIsotopologueSelect.Items = sprintfc('%01d',1:numIso);
 
 ddGasSelect.ValueChangedFcn = @(dd,event)DropDownGasChanged(ddGasSelect,lBoxIsotopologueSelect,Transitions,Gases);
 
- maxFreq = 43410;
 lblFrequencyStart = uilabel(fig,'Position',[1300,685,250,50]);
 lblFrequencyStart.Text = "Frequency Start (cm-1)";
-editFrequencyStart = uieditfield(fig,'numeric','Position',[1300,650,250,50],...
-    'Limits',[0,maxFreq],...
-    'LowerLimitInclusive','on',...
-    'UpperLimitInclusive','on');
-
+editFrequencyStart = uieditfield(fig,'numeric','Position',[1300,650,250,50]);
 
 lblFrequencyEnd = uilabel(fig,'Position',[1300,610,250,50]);
 lblFrequencyEnd.Text = "Frequency End (cm-1)";
-editFrequencyEnd = uieditfield(fig,'numeric','Position',[1300,575,250,50],...
-    'Limits',[0,maxFreq],...
-    'LowerLimitInclusive','on',...
-    'UpperLimitInclusive','off');
+editFrequencyEnd = uieditfield(fig,'numeric','Position',[1300,575,250,50]);
 
 lblFrequencyStartNm = uilabel(fig,'Position',[1600,685,250,50]);
 lblFrequencyStartNm.Text = "Frequency Start (nm)";
-editFrequencyStartNm = uieditfield(fig,'numeric','Position',[1600,650,250,50],...
-    'Limits',[0,maxFreq],...
-    'LowerLimitInclusive','on',...
-    'UpperLimitInclusive','on');
-
+editFrequencyStartNm = uieditfield(fig,'numeric','Position',[1600,650,250,50]);
 
 lblFrequencyEndNm = uilabel(fig,'Position',[1600,610,250,50]);
 lblFrequencyEndNm.Text = "Frequency End (nm)";
-editFrequencyEndNm = uieditfield(fig,'numeric','Position',[1600,575,250,50],...
-    'Limits',[0,maxFreq],...
-    'LowerLimitInclusive','on',...
-    'UpperLimitInclusive','off');
+editFrequencyEndNm = uieditfield(fig,'numeric','Position',[1600,575,250,50]);
+
 
 editFrequencyStart.ValueChangedFcn = @(numfld,event)changeUnits(editFrequencyStartNm,editFrequencyStart);
 editFrequencyEnd.ValueChangedFcn = @(numfld,event)changeUnits(editFrequencyEndNm,editFrequencyEnd);
@@ -77,11 +61,15 @@ editFrequencyEndNm.ValueChangedFcn = @(numfld,event)changeUnits(editFrequencyEnd
 
 lblTemp = uilabel(fig,'Position',[1300,535,250,50]);
 lblTemp.Text = "Temperature (K)";
-editTemp = uieditfield(fig,'numeric','Position',[1300,500,250,50],...
-    'Limits',[1,3500],...
-    'LowerLimitInclusive','on',...
-    'UpperLimitInclusive','on');
+editTemp = uieditfield(fig,'numeric','Position',[1300,500,250,50]);
 
+lblTempDeg = uilabel(fig,'Position',[1600,535,250,50]);
+text = sprintf('Temperature (%cC)' , char(176));
+lblTempDeg.Text = text;
+editTempDeg = uieditfield(fig,'numeric','Position',[1600,500,250,50]);
+
+editTemp.ValueChangedFcn = @(numfld,event)changeTempDeg(editTempDeg,editTemp);
+editTempDeg.ValueChangedFcn = @(numfld,event)changeTempK(editTemp,editTempDeg);
 
 lblPressure = uilabel(fig,'Position',[1300,460,250,50]);
 lblPressure.Text = "Pressure (Atm)";
@@ -90,43 +78,48 @@ editPressure = uieditfield(fig,'numeric','Position',[1300,425,250,50],...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','on');
 
-lblConcentration = uilabel(fig,'Position',[1600,535,250,50]);
+lblConcentration = uilabel(fig,'Position',[1600,460,250,50]);
 lblConcentration.Text = "Concentration";
-editConcentration = uieditfield(fig,'numeric','Position',[1600,500,250,50],...
+editConcentration = uieditfield(fig,'numeric','Position',[1600,425,250,50],...
     'Limits',[0,Inf],...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','on');
 
-lblPLength = uilabel(fig,'Position',[1600,460,250,50]);
+lblPLength = uilabel(fig,'Position',[1600,385,250,50]);
 lblPLength.Text = "Path Length (cm)";
-editPLength = uieditfield(fig,'numeric','Position',[1600,425,250,50],...
+editPLength = uieditfield(fig,'numeric','Position',[1600,350,250,50],...
     'Limits',[0,Inf],...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','on');
+
+lblPlotType = uilabel(fig,'Position',[1300,385,250,50]);
+lblPlotType.Text = "Plot Type";
+plotTypeSelect = uidropdown(fig,'Position',[1300,350,250,50]);
+plotTypeSelect.Items = {'Absorption', 'Transmission'}; 
 
 plotButton = uibutton(fig,...
-'Position',[1370,325,150,30],...
+'Position',[1340,275,150,30],...
 'Text','Plot');
-% handles.plotButton.UserData = 0 ;
 
 clearButton = uibutton(fig,...
-'Position',[1550,325,150,30],...
+'Position',[1520,275,150,30],...
 'Text','Clear Plot');
 clearButton.Enable = 'off';
 
 addPlotsButton = uibutton(fig,...
-    'Position',[1450,375,150,30],...
+    'Position',[1700,275,150,30],...
     'Text','Sum Current Plots');
 addPlotsButton.Enable = 'off';
+
 
 numClicks = 0;
 guidata(fig,numClicks);
 
-addPlotsButton.ButtonPushedFcn = @(btn,event)sumCurrentPlots(fig,ax,plotButton,addPlotsButton);
+addPlotsButton.ButtonPushedFcn = @(btn,event)sumCurrentPlots(fig,ax);
 clearButton.ButtonPushedFcn = @(btn,event)clearPlot(fig,ax,clearButton,addPlotsButton,plotButton);
 
 plotButton.ButtonPushedFcn = @(btn,event)plotButtonPress(fig,ax,plotButton,addPlotsButton,...
-    clearButton,data,Gases,ddModelType,ddGasSelect,lBoxIsotopologueSelect,editFrequencyStart,...
+    clearButton,data,Gases,ddModelType,ddGasSelect,plotTypeSelect,lBoxIsotopologueSelect,editFrequencyStart,...
     editFrequencyEnd,editTemp,editPressure,editConcentration,editPLength); 
 
 fig.Visible = 'on';
@@ -145,6 +138,14 @@ function changeUnits(editFrequencyStart, editFrequencyStartNm)
 editFrequencyStart.Value = 1e7/editFrequencyStartNm.Value;
 end
 
+function changeTempDeg(editTempDeg,editTemp)
+    editTempDeg.Value = editTemp.Value - 273.15;
+end
+
+function changeTempK(editTemp,editTempDeg)
+    editTemp.Value = round(editTempDeg.Value + 273.15);
+end
+
 function clearPlot(fig,ax,clearButton,addPlotsButton,plotButton)
     numClicks = guidata(fig);
     numClicks = 0;
@@ -155,7 +156,7 @@ function clearPlot(fig,ax,clearButton,addPlotsButton,plotButton)
     plotButton.Enable = 'on';   
 end
 
-function sumCurrentPlots(fig,ax,plotButton,addPlotsButton)
+function sumCurrentPlots(fig,ax)
  numClicks = guidata(fig);    
 x = getappdata(fig,'xaxis');
     plotData1 = getappdata(fig,'currentPlot1');
@@ -170,7 +171,7 @@ x = getappdata(fig,'xaxis');
 end
 
 function plotButtonPress(fig,ax,plotButton,addPlotsButton,clearButton,tempdata,...
-    Gases,ddModelType,ddGasSelect,lBoxIsotopologueSelect,editFrequencyStart,...
+    Gases,ddModelType,ddGasSelect,plotTypeSelect,lBoxIsotopologueSelect,editFrequencyStart,...
     editFrequencyEnd,editTemp,editPressure,editConcentration,editPLength)
     
 clearButton.Enable = 'on';
@@ -290,19 +291,12 @@ clearButton.Enable = 'on';
         voigtFinal = Kielkopf(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength,P,pShift);
     end
 
-
-    ax.XGrid='on';
-    ax.YGrid='on';
+    ax.XGrid='on'; ax.YGrid='on';
     ax.Title.String = "All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd;
     ax.YLabel.String = 'Absorbance, (I/Io)';
     ax.XLabel.String = 'Frequency, cm-1';
     ax.NextPlot = 'add';
-
-    % lgd = ax.Legend;
-    % set(lgd,'string',gasChoice);
-    % legend(ax,label)
-    % lgd = ax.Legend;
-    % lgd = legend(gasChoice);
+    
     isoList = zeros(1,isoSize);
     for n = 1: isoSize
          if(isempty(voigtFinal{n}))
@@ -316,7 +310,6 @@ clearButton.Enable = 'on';
     formatSpec = ['No absorbance for isotopolgue(s): ' repmat('%1.0f ,',1,numel(isoList)) ' in %s'];
     text = sprintf(formatSpec,isoList,gasChoice);
     absorbanceEmptyLbl.Text = text;
-
     x = v{1}(1,:);
     approx = voigtFinal(~cellfun('isempty',voigtFinal));
     finalApprox = cell(1,length(approx));
@@ -325,6 +318,12 @@ clearButton.Enable = 'on';
         y{n} = finalApprox{n};
     end
     setappdata(fig,'xaxis',x);
+    plotType = plotTypeSelect.Value;
+   if(strcmp(plotType,'Transmission'))
+       y{n} = exp(-1.*y{n});
+       ax.YLabel.String = 'Transmission';
+   end
+   
     switch numClicks
         case 1
         if(length(finalApprox) >1)
