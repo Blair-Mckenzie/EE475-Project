@@ -103,7 +103,7 @@ step = 500;                         % Number of data points in wavelength
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Allocating size of cell arrays and matrices
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[v,v0,S_t0,gammaAir,gammaSelf,pShift,E_lower,gammaG,gammaL,Y,X,Vxy,tempLineStrength,phiL,phiG,phiV,voigtFinalConv] = deal(cell(1,isoSize));
+[v,v0,S_t0,gammaAir,gammaSelf,pShift,E_lower,gammaG,gammaG1,gammaL,gammaL1,Y,X,Vxy,tempLineStrength,phiL,phiG,phiV,voigtFinalConv] = deal(cell(1,isoSize));
 [Q_tref,Q_t] = deal(zeros(1,isoSize));
 [Q_tref_temp,Q_t_temp] = deal(zeros(1,2,isoSize));
 
@@ -124,18 +124,21 @@ Q_tref_temp(:,:,n) = partitions{n}(T0,:);
 Q_tref(n) = Q_tref_temp(n*2);                                   
 Q_t_temp(:,:,n) = partitions{n}(T,:);
 Q_t(n) = Q_t_temp(n*2);                                         
-gammaG{n} = ((v0{n}./2).*(7.1623e-7.*(T/M(n)).^0.5))';          % Calculates the Gaussian HWHM
-gammaL{n} = (((concentration.*gammaSelf{n})+ ...                % Calculates the Lorentzian HWHM
+gammaG{n} = ((v0{n}).*(7.1623e-7.*(T/M(n)).^0.5))';          % Calculates the Gaussian FWHM
+gammaG1{n} = ((v0{n}./2).*(7.1623e-7.*(T/M(n)).^0.5))';          % Calculates the Gaussian HWHM
+gammaL{n} = ((2*P).*((concentration.*gammaSelf{n})+ ...         % Calculates the Lorentzian FWHM
+((1-concentration).*gammaAir{n})))';
+gammaL1{n} = ((P).*((concentration.*gammaSelf{n})+ ...         % Calculates the Lorentzian HWHM
 ((1-concentration).*gammaAir{n})))';
 Y{n} = (gammaL{n}.*sqrt(log(2)))./gammaG{n};                    % Calculating Y for Voigt lineshape
 
     for k = 1:dataSize(n)
-            phiL{n}(k,:) = 1/pi.*( (gammaL{n}(k)) ./ ( (v{n}(k,:)-v0{n}(k)).^2 + (gammaL{n}(k)).^2 ) ) ;
-            phiG{n}(k,:) = (4./gammaG{n}(k)) .* (sqrt(log(2)/pi)) .* exp(-4*log(2).*((v{n}(k,:)-v0{n}(k))./(gammaG{n}(k)) ).^2);
+            phiL{n}(k,:) = 1/pi.*( (gammaL1{n}(k)) ./ ( (v{n}(k,:)-v0{n}(k)).^2 + (gammaL1{n}(k)).^2 ) ) ;
+            phiG{n}(k,:) = (4./gammaG1{n}(k)) .* (sqrt(log(2)/pi)) .* exp(-4*log(2).*((v{n}(k,:)-v0{n}(k))./(gammaG1{n}(k)) ).^2);
             phiV{n}(k,:) = conv(phiL{n}(k,:),phiG{n}(k,:));
             tempLineStrength{n}(k) = S_t0{n}(k) .*( (Q_tref(n)/Q_t(n)) .* (exp(-c2.*E_lower{n}(k)./T) ./ exp(-c2.*E_lower{n}(k)./T0))...
         .* ( (1-exp(-c2.*v0{n}(k)./T)) ./(1-exp(-c2.*v0{n}(k)./T0))));
-            voigtFinalConv{n}(k,:) = 2*P*concentration*pLength./gammaG{n}(k).*tempLineStrength{n}(k).*sqrt(log(2)/pi).*phiV{n}(k,:);
+            voigtFinalConv{n}(k,:) = 2*P*concentration*pLength./gammaG1{n}(k).*tempLineStrength{n}(k).*sqrt(log(2)/pi).*phiV{n}(k,:);
     end
 end
 finalAbsorption = sum(voigtFinalConv{1});

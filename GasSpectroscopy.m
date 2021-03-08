@@ -15,6 +15,7 @@ tempdata = GasTransitions;
 keySet = {'Water','Carbon Dioxide','Ozone','Nitrogen Oxide','Carbon Monoxide','Methane','Oxygen','Nitric Oxide','Sulfur Dioxide','Nitrogen Dioxide','Ammonia','Nitric Acid','Hydroxyl','Hydrogen Fluoride','Hydrogen Chloride','Hydrogen Bromide','Hydrogen Iodide','Chlorine Monoxide','Carbonyl Sulfide','Formaldehyde','Hypochlorous Acid','Nitrogen','Hydrogen Cyanide','Methyl Chloride','Hydrogen Peroxide','Acetylene','Ethane','Phosphine','Carbonyl Fluoride','Hydrogen Sulfide','Formic Acid','Hydroperoxyl','Oxygen Atom','Nitric Oxide Cation','Hypobromous Acid','Methanol','Methyl Bromide','Acetonitrile','Diacetylene','Cyanoacetylene','Hydrogen','Carbon Monosulfide','Sulfur trioxide','Cyanogen','Phosgene','Carbon disulfide'};
 valueSet = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 31 32 33 34 36 37 39 40 41 43 44 45 46 47 48 49 53];
 gases = containers.Map(keySet,valueSet);
+save('gasMap','gases');
 
 gasChoice = 'Methane';                          % Gas to be modelled                      
 gasFind = (tempdata(:,1)== gases(gasChoice));   % Creates a logical matrix with all rows that match the gas choice
@@ -99,7 +100,7 @@ T = 1000;                           % Temperature of system (Kelvin)
 P = 1;                              % Pressure of system (Atmosphere)
 concentration = 0.0001;               % Concentration
 pLength = 1;                        % Length of cell(cm)
-step = 500;                         % Number of data points in wavelength 
+step = 1000;                         % Number of data points in wavelength 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Allocating size of cell arrays and matrices
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -151,9 +152,9 @@ voigtFinal2 = Kielkopf(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,Q_tref,Q_t,c2,E_
 mcleans = sum(voigtFinal{1});
 
 
-% simpleEmpirical = sum(voigtFinal1{1});
+simpleEmpirical = sum(voigtFinal1{1});
 kielkopf = sum(voigtFinal2{1});
-% difference = PercentageDifference(mcleans,kielkopf);
+difference = PercentageDifference(mcleans,simpleEmpirical);
 
 % for n = 1: isoSize
 %    if(isempty(voigtFinal{n}))
@@ -162,8 +163,8 @@ kielkopf = sum(voigtFinal2{1});
 % end
 
 % figure('units','normalized','outerposition',[0 0 1 1])
-% yyaxis left
-% plot(v{1}(1,:),kielkopf,'r',v{1}(1,:),mcleans,'b')
+% % yyaxis left
+% plot(v{1}(1,:),simpleEmpirical,'r',v{1}(1,:),mcleans,'b')
 % title("All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd)
 % xlabel("Frequency, cm-1")
 % ylabel("Absorbance, -ln(I/Io)")
@@ -171,7 +172,7 @@ kielkopf = sum(voigtFinal2{1});
 % yyaxis right
 % ylabel("% Difference")
 % plot(v{1}(1,:),difference)
-% legend('Kielkopf','Mcleans Model','Percentage difference');
+% legend('Simple Empirical','Mcleans Model','Percentage difference');
 
 
 % figure('units','normalized','outerposition',[0 0 1 1])
