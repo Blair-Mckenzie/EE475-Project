@@ -17,12 +17,12 @@ yVoigt = real(fadf((x + 1i*HWHM)/sigma/sqrt(2)))./ sigma./sqrt(2*pi);
 
 figure('units','normalized','outerposition',[0 0 1 1])
 subplot(1,2,1)
-plot(x,yGaus);
+plot(x,yGaus,x,yLorent);
 grid on
 title('Guassian and Lorentzian PDFs');
-hold on
-plot(x,yLorent);
-legend('Gaussian','Lorentzian');
+legend('Gaussian: \mu = 0, \sigma = 1','Lorentzian: x_0 = 0, \gamma = 1');
+xlabel('x')
+ylabel('P(x)')
 
 subplot(1,2,2)
 plot(x,yGaus);
@@ -32,6 +32,7 @@ hold on
 plot(x,yLorent);
 hold on
 plot(x,yVoigt);
-legend('Guassian','Lorentzian','Convolution');
+legend('Gaussian: \mu = 0, \sigma = 1','Lorentzian: x_0 = 0, \gamma = 1',...
+    'Convolution');
 xlabel('x')
-ylabel('Data Probability Density')
+ylabel('P(x)')
