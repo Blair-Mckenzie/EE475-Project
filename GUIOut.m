@@ -4,7 +4,7 @@ tempData = GasTransitions;
 load('gasMap','gases')
 Gases = gases;
 
-fig = uifigure('Visible','off','Position',[150 80 1600 850]);
+fig = uifigure('Visible','off','Position',[50 10 1300 750]);
 m = uimenu(fig,'Text','&File');
 mitem = uimenu(m,'Text','&Help');
 mitem2 = uimenu(m,'Text','&About');
@@ -343,7 +343,7 @@ tic
    end
    currentPlots{end+1} = out;
    setappdata(fig,'currentPlot',currentPlots);
-   legendText = strcat(gasChoice,": ",approxSelect);
+   legendText = strcat(gasChoice," (",num2str(pLength)," cm)",": ",approxSelect);
    plot(ax,x,out,'DisplayName',legendText);  
    legend(ax,'FontSize',10);
     end
