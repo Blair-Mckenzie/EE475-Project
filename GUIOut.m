@@ -1,4 +1,4 @@
-load('C:\Users\bmcke\Documents\University\4th Year\gasTransitions','GasTransitions')
+load('C:\Users\Blair\Documents\Uni\4thYear\gasTransitions','GasTransitions')
 data = GasTransitions;
 tempData = GasTransitions;
 load('gasMap','gases')
@@ -17,32 +17,32 @@ lblTitle.FontSize = 22;
 
 ax = uiaxes(fig,'Position',[30,30,750,600]);
 
-lblModelType = uilabel(fig,'Position',[800,575,200,50]);
+lblModelType = uilabel(fig,'Position',[800,590,200,50]);
 lblModelType.Text = "Approximation";
 ddModelType = uidropdown(fig,'Position',[800,555,200,50]);    
 ddModelType.Items = {'Mcleans','Simple Empirical','Kielkopf'};
 
-lblGasSelect = uilabel(fig,'Position',[800,505,200,50]);
+lblGasSelect = uilabel(fig,'Position',[800,520,200,50]);
 lblGasSelect.Text = "Select Gas";
 ddGasSelect = uidropdown(fig,'Position',[800,485,200,50]);
 ddGasSelect.Items = keys(Gases);
 
-lblFrequencyStart = uilabel(fig,'Position',[800,435,200,50]);
+lblFrequencyStart = uilabel(fig,'Position',[800,450,200,50]);
 lblFrequencyStart.Text = "Frequency Start (cm-1)";
 editFrequencyStart = uieditfield(fig,'numeric','Position',...
     [800,415,200,50]);
 
-lblFrequencyEnd = uilabel(fig,'Position',[800,365,200,50]);
+lblFrequencyEnd = uilabel(fig,'Position',[800,380,200,50]);
 lblFrequencyEnd.Text = "Frequency End (cm-1)";
 editFrequencyEnd = uieditfield(fig,'numeric','Position',...
     [800,345,200,50]);
 
-lblFrequencyStartNm = uilabel(fig,'Position',[1050,435,200,50]);
+lblFrequencyStartNm = uilabel(fig,'Position',[1050,450,200,50]);
 lblFrequencyStartNm.Text = "Wavelength (nm)";
 editFrequencyStartNm = uieditfield(fig,'numeric','Position',...
     [1050,415,200,50]);
 
-lblFrequencyEndNm = uilabel(fig,'Position',[1050,365,200,50]);
+lblFrequencyEndNm = uilabel(fig,'Position',[1050,380,200,50]);
 lblFrequencyEndNm.Text = "Wavelength (nm)";
 editFrequencyEndNm = uieditfield(fig,'numeric','Position',...
     [1050,345,200,50]);
@@ -56,13 +56,13 @@ editFrequencyStartNm.ValueChangedFcn = @(numfld,event)changeUnits...
 editFrequencyEndNm.ValueChangedFcn = @(numfld,event)changeUnits...
     (editFrequencyEnd,editFrequencyEndNm);
 
-lblTemp = uilabel(fig,'Position',[800,295,200,50]);
+lblTemp = uilabel(fig,'Position',[800,310,200,50]);
 lblTemp.Text = "Temperature (K)";
 editTemp = uieditfield(fig,'numeric','Position',[800,275,200,50],...
     'Limits',[0,Inf],...
     'RoundFractionalValues','on');
 
-lblTempDeg = uilabel(fig,'Position',[1050,295,200,50]);
+lblTempDeg = uilabel(fig,'Position',[1050,310,200,50]);
 text = sprintf('Temperature (%cC)' , char(176));
 lblTempDeg.Text = text;
 editTempDeg = uieditfield(fig,'numeric','Position',[1050,275,200,50],...
@@ -74,14 +74,14 @@ editTemp.ValueChangedFcn = @(numfld,event)changeTempDeg...
 editTempDeg.ValueChangedFcn = @(numfld,event)changeTempK...
     (editTemp,editTempDeg);
 
-lblPressure = uilabel(fig,'Position',[1050,225,200,50]);
+lblPressure = uilabel(fig,'Position',[1050,240,200,50]);
 lblPressure.Text = "Pressure (Atm)";
 editPressure = uieditfield(fig,'numeric','Position',[1050,205,200,50],...
     'Limits',[0,Inf],...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','on');
 
-lblConcentration = uilabel(fig,'Position',[1050,575,200,50]);
+lblConcentration = uilabel(fig,'Position',[1050,590,200,50]);
 lblConcentration.Text = "Concentration (mol/L)";
 editConcentration = uieditfield(fig,'numeric','Position',...
     [1050,555,200,50],...
@@ -89,7 +89,7 @@ editConcentration = uieditfield(fig,'numeric','Position',...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','on');
 
-lblPLength = uilabel(fig,'Position',[1050,505,200,50]);
+lblPLength = uilabel(fig,'Position',[1050,520,200,50]);
 lblPLength.Text = "Path Length (cm)";
 editPLength = uieditfield(fig,'numeric','Position',...
     [1050,485,200,50],...
@@ -97,7 +97,7 @@ editPLength = uieditfield(fig,'numeric','Position',...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','on');
 
-lblPlotType = uilabel(fig,'Position',[800,225,200,50]);
+lblPlotType = uilabel(fig,'Position',[800,240,200,50]);
 lblPlotType.Text = "Plot Type";
 plotTypeSelect = uidropdown(fig,'Position',[800,205,200,50]);
 plotTypeSelect.Items = {'Absorption', 'Transmission'}; 
@@ -344,7 +344,7 @@ tic
    end
    currentPlots{end+1} = out;
    setappdata(fig,'currentPlot',currentPlots);
-   legendText = strcat(gasChoice," (",num2str(pLength)," cm)",": ",approxSelect);
+   legendText = strcat(gasChoice,": ",approxSelect);
    plot(ax,x,out,'DisplayName',legendText);  
    legend(ax);
     end
