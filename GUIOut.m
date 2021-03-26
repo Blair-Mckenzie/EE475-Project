@@ -5,6 +5,7 @@ load('gasMap','gases')
 Gases = gases;
 
 fig = uifigure('Visible','off','Position',[50 30 1300 700]);
+
 m = uimenu(fig,'Text','&File');
 mitem = uimenu(m,'Text','&Help');
 mitem2 = uimenu(m,'Text','&About');
@@ -349,6 +350,3 @@ tic
     end
 toc
 end
-
-
-
