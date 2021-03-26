@@ -4,7 +4,7 @@ tempData = GasTransitions;
 load('gasMap','gases')
 Gases = gases;
 
-fig = uifigure('Visible','off','Position',[50 10 1300 750]);
+fig = uifigure('Visible','off','Position',[150 80 1600 850]);
 m = uimenu(fig,'Text','&File');
 mitem = uimenu(m,'Text','&Help');
 mitem2 = uimenu(m,'Text','&About');
@@ -349,6 +349,3 @@ tic
     end
 toc
 end
-
-
-
