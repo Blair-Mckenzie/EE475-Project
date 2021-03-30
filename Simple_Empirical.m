@@ -29,37 +29,4 @@ for n = 1:isoSize
       tempLineStrength{n}(k).*sqrt(log(2)/pi).*(approx{n}(k,:)))./18;
   end
 end
-
-% y for humlicek voigt
-% y = (gammaL.*sqrt(log(2)))./sigmaG;
-% n =12;
-% sigma = 1.5;
-
-% x_k = [ 0.314240376254359 0.947788391240164 1.597682635152605 2.279507080501060 3.020637025120890 3.889724897869782];
-% w_k = [ 0.5701352362625 0.2604923102642 0.5160798561588 0.3905390584629 0.8573687043588 0.2658551684356];
-% x_k = [-3.889724897869782 -3.020637025120890 -2.279507080501060 -1.597682635152605 -0.947788391240164 -0.314240376254359 0.314240376254359 0.947788391240164 1.597682635152605 2.279507080501060 3.020637025120890 3.889724897869782];
-% w_k = [-0.2658551684356 -0.8573687043588 -0.3905390584629 -0.5160798561588 -0.2604923102642 -0.5701352362625 0.5701352362625 0.2604923102642 0.5160798561588 0.3905390584629 0.8573687043588 0.2658551684356];
- 
-% Vxy = zeros(step,4,dataSize);
-% tempLineStrength = zeros(dataSize,1);
-% result = zeros(step,n/2,dataSize);
-
-    
-    %     % x for humlicek voigt 
-    %      x(k,:) = (2*sqrt(log(2))./sigmaG(k)).*(v(k,:)-v0(k)')-(P.*pShift(k));
-    %      
-    %     %empirical expression to approximate the Voigt function 
-    %     simpleApprox(k,:) = ( (c_L(k) .* 1/pi) .* (gammaV(k)./(v(k,:)-v0(k).^2) + gammaV(k).^2) ) + c_G(k) .* (sqrt(log(2))./ sqrt(pi) .* gammaV(k) ) .* exp( (-log(2).*(v(k,:)-v0(k)).^2 ) ./ (gammaV(k).^2) ) ;
-    %     
-    %     vf = real(fadf(x(k,:)+ 1i.*y(k)));
-    %     
-    %     for kk = 1:n
-    %         a_k = -1*(1/pi)*w_k(kk)*exp(sigma^2)*sin(2*x_k(kk)*sigma);
-    %         b_k = (1/pi)*w_k(kk)*exp(sigma^2) * cos(2*x_k(kk)*sigma);
-    %         result(:,kk,k) =  ( y(k)./ ((x(k,:)-x_k(kk)).^2 + sigma^2) ) .*( (b_k.*( ((x(k,:)-x_k(kk)).^2) -(sigma.*(y(k) + sigma))) - (a_k.*(x(k,:)-x_k(kk)).*(y(k)+2.*sigma)) ) ./ ( (x(k,:)-x_k(kk)).^2 + (y(k)+sigma).^2)) ;
-    %     end
-    %     humlicekApprox(k,:) = sum(result(:,:,k)');
-    %     humlicekApprox(k,:) = exp(-1.*x(k,:).^2) +  sum(result(:,:,k)');
-
-
 end

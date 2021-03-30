@@ -1,6 +1,6 @@
 clc
 close all
-clearvars -except GasTransitions gasData   
+clearvars -except GasTransitions gasData 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Reading in Gas data
@@ -18,7 +18,7 @@ gases = containers.Map(keySet,valueSet);
 save('gasMap','gases');
 
 % Gas to be modelled 
-gasChoice = 'Methane';
+gasChoice = 'Carbon Dioxide';
 % Creates a logical matrix with all rows that match the gas choice
 gasFind = (tempdata(:,1)== gases(gasChoice));
 % Uses the new matrix to rezise the data to only include the selected gas
@@ -33,6 +33,8 @@ load('MethaneSpectraPlot','spectra1650')
 MethaneSpectra = spectra1650;
 
 spectra1650nm = csvread('C:\Users\Blair\Downloads\SpectraPlotSim1\spectra.csv');
+waterSpectra = csvread('C:\Users\Blair\Downloads\SpectraPlotSimulations\waterSpectraPlot.csv');
+carbonSpectra = csvread('C:\Users\Blair\Downloads\SpectraPlotSimulations\carbonSpectraPlot.csv');
 
 %Goes Through each .mat file in the GasData fodler
 %and combines them vertically to obtain one single .mat 
@@ -89,8 +91,8 @@ masses(:,1) = [];
 
 % vStart = 6055;                      % Start of frequency range to be looked at 
 % vEnd = 6059;                        % End of frequency range to be looked at 
-vStart = 6291;
-vEnd = 6293;
+vStart = 5000;
+vEnd = 5005;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Declaring Constants 
@@ -105,7 +107,7 @@ T = 1000;                           % Temperature of system (Kelvin)
 P = 1;                              % Pressure of system (Atmosphere)
 concentration = 0.0001;             % Concentration
 pLength = 1;                        % Length of cell(cm)
-step = 1000;                        % Number of data points in frequency 
+step = 5000;                        % Number of data points in frequency 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Allocating size of cell arrays and matrices
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -174,12 +176,6 @@ simpleEmpirical = sum(voigtFinal1{1});
 kielkopf = sum(voigtFinal2{1});
 difference = PercentageDifference(mcleans,simpleEmpirical);
 
-% for n = 1: isoSize
-%    if(isempty(voigtFinal{n}))
-%        fprintf('No absorbance for isotopolgue: %d in: %s  \n',isoChoice(n),gasChoice)   
-%    end
-% end
-
 % figure('units','normalized','outerposition',[0 0 1 1])
 % % yyaxis left
 % plot(v{1}(1,:),simpleEmpirical,'r',v{1}(1,:),mcleans,'b')
@@ -238,14 +234,14 @@ difference = PercentageDifference(mcleans,simpleEmpirical);
 % grid on
 % legend('Simple Empirical approxiamtion','Mcleans Model');
  
-% figure('units','normalized','outerposition',[0 0 1 1])
-% plot(v{1}(1,:),mcleans)
-% title("Mcleans Approximation against SpectraPlot for range " + vStart + " to " + vEnd +" cm-1")
-% xlabel("Frequency, cm-1")
-% ylabel("Absorbance, (I/Io)")
-% grid on
-% hold on
-% plot(v{1}(1,:),spectraPlot)
-% legend('Mcleans Approximation','SpectraPlot Model');
+figure('units','normalized','outerposition',[0 0 1 1])
+plot(v{1}(1,:),mcleans)
+title("Mcleans Approximation against SpectraPlot for range " + vStart + " to " + vEnd +" cm-1")
+xlabel("Frequency, cm-1")
+ylabel("Absorbance, (I/Io)")
+grid on
+hold on
+plot(v{1}(1,:),carbonSpectra)
+legend('Mcleans Approximation','SpectraPlot Model');
 
-GUI(GasTransitions,gases)
+% GUI(GasTransitions,gases)

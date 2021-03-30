@@ -1,4 +1,5 @@
-load('C:\Users\Blair\Documents\Uni\4thYear\gasTransitions','GasTransitions')
+load('C:\Users\Blair\Documents\Uni\4thYear\gasTransitions',...
+    'GasTransitions')
 data = GasTransitions;
 tempData = GasTransitions;
 load('gasMap','gases')
@@ -120,14 +121,17 @@ numClicks = 0;
 guidata(fig,numClicks);
 currentPlots ={};
 setappdata(fig,'currentPlots',currentPlots);
+times=[];
+setappdata(fig,'times',times);
              
 addPlotsButton.ButtonPushedFcn = @(btn,event)sumCurrentPlots(fig,ax);
-clearButton.ButtonPushedFcn = @(btn,event)clearPlot(ax,clearButton,addPlotsButton,plotButton);
+clearButton.ButtonPushedFcn = @(btn,event)clearPlot(ax,clearButton,...
+    addPlotsButton,plotButton);
 
-plotButton.ButtonPushedFcn = @(btn,event)plotButtonPress(fig,ax,addPlotsButton,...
-    clearButton,data,Gases,ddModelType,ddGasSelect,plotTypeSelect,editFrequencyStart,...
-    editFrequencyEnd,editTemp,editPressure,editConcentration,editPLength); 
-
+plotButton.ButtonPushedFcn = @(btn,event)plotButtonPress(fig,ax,...
+    addPlotsButton,clearButton,data,Gases,ddModelType,ddGasSelect,...
+    plotTypeSelect,editFrequencyStart,editFrequencyEnd,editTemp,...
+    editPressure,editConcentration,editPLength); 
 fig.Visible = 'on';
 
 function MenuSelected()
@@ -180,8 +184,10 @@ tic
     tempdata = tempdata(gasFind,(1:10));
 
     numIso = max(tempdata(:,2));
-    isoChoice = str2double(sprintfc('%01d',1:numIso));                     % Isotopologue(s) to be looked at
-    isoSize = length(isoChoice);                                           % Size of isoChoice martix
+    % Isotopologue(s) to be looked at
+    isoChoice = str2double(sprintfc('%01d',1:numIso));
+    % Size of isoChoice martix
+    isoSize = length(isoChoice);                                           
     data = cell(1,isoSize);                 
     for n = 1: isoSize
         isoFind = (tempdata(:,2 )== isoChoice(n));
@@ -192,7 +198,8 @@ tic
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     partitions = cell(1,isoSize);
     for n = 1: length(isoChoice)
-    partFilePath = strcat(pwd,'\GasData\',gasChoice,num2str(isoChoice(n)),'.txt');
+    partFilePath = strcat(pwd,'\GasData\',gasChoice,...
+        num2str(isoChoice(n)),'.txt');
     fid = fopen(partFilePath);
     formatSpec  = '%4f %16f %*[^\n]';
     st0 = textscan(fid,formatSpec);
@@ -239,7 +246,7 @@ tic
     concentration = editConcentration.Value;        % Concentration
     pLength = editPLength.Value;                    % Length of cell(cm)
     M = masses(isoChoice);                          % Molecular mass of the selected gas
-    step = 500;                                     % Number of data points in wavelength
+    step = 1000;                                    % Number of data points in wavelength
     
     if(cellfun(@isempty,data))
         uialert(fig,'No absorbance for specified frequency range, please try again','Plot Error'); 
@@ -347,6 +354,6 @@ tic
    legendText = strcat(gasChoice,": ",approxSelect);
    plot(ax,x,out,'DisplayName',legendText);  
    legend(ax);
-    end
+    end 
 toc
 end
