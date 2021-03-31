@@ -150,20 +150,6 @@ gammaL{n} = ((2*P).*((concentration.*gammaSelf{n})+ ...
 % Calculating Y for Voigt lineshape
 Y{n} = (gammaL{n}.*sqrt(log(2)))./gammaG{n};                    
 
-    for k = 1:dataSize(n)
-            phiL{n}(k,:) = 1/pi.*( (gammaL{n}(k)./2) ./ ( (v{n}(k,:)-v0{n}(k)).^2 + (gammaL{n}(k)./2).^2 ) ) ;
-            phiG{n}(k,:) = (2./gammaG{n}(k)) .* (sqrt(log(2)/pi)) .* exp(-4*log(2).*((v{n}(k,:)-v0{n}(k))./(gammaG{n}(k)) ).^2);
-            phiV{n}(k,:) = conv(phiL{n}(k,:),phiG{n}(k,:));
-            tempLineStrength{n}(k) = S_t0{n}(k) .*( (Q_tref(n)/Q_t(n)) .* (exp(-c2.*E_lower{n}(k)./T) ./ exp(-c2.*E_lower{n}(k)./T0))...
-        .* ( (1-exp(-c2.*v0{n}(k)./T)) ./(1-exp(-c2.*v0{n}(k)./T0))));
-            voigtFinalConv{n}(k,:) = 2*P*concentration*pLength./gammaG{n}(k).*tempLineStrength{n}(k).*sqrt(log(2)/pi).*phiV{n}(k,:);
-             %Calculating X for Voigt lineshape
-            X{n}(k,:) = (2*sqrt(log(2))./gammaG{n}(k)).*(v{n}(k,:)-v0{n}(k)')-(P.*pShift{n}(k));
-    end
-end
-finalAbsorption = sum(voigtFinalConv{1});
-vConv = linspace(vStart,vEnd,((2*step)-1));
-
 voigtFinal = Mcleans(isoSize,dataSize,gammaG,v,v0,P,pShift,Y,S_t0,...
     Q_tref,Q_t,c2,E_lower,T,T0,concentration,pLength);
 voigtFinal1 = Simple_Empirical(isoSize,dataSize,gammaL,gammaG,v,v0,...
@@ -174,30 +160,7 @@ voigtFinal2 = Kielkopf(isoSize,dataSize,gammaL,gammaG,v,v0,S_t0,...
 mcleans = sum(voigtFinal{1});
 simpleEmpirical = sum(voigtFinal1{1});
 kielkopf = sum(voigtFinal2{1});
-difference = PercentageDifference(mcleans,simpleEmpirical);
 
-% figure('units','normalized','outerposition',[0 0 1 1])
-% % yyaxis left
-% plot(v{1}(1,:),simpleEmpirical,'r',v{1}(1,:),mcleans,'b')
-% title("All voigt line shapes for " + gasChoice + " in the range " + vStart + " to " + vEnd)
-% xlabel("Frequency, cm-1")
-% ylabel("Absorbance, -ln(I/Io)")
-% grid on
-% yyaxis right
-% ylabel("% Difference")
-% plot(v{1}(1,:),difference)
-% legend('Simple Empirical','Mcleans Model','Percentage difference');
-
-
-% figure('units','normalized','outerposition',[0 0 1 1])
-% yyaxis left
-% plot(vConv,finalAbsorption)
-% xlabel("Frequency, cm-1")
-% ylabel("Absorbance, -ln(I/Io)")
-% grid on
-% yyaxis right
-% plot(v{1}(1,:),mcleans)
-% legend('Convolution','Mcleans')
 
 % figure('units','normalized','outerposition',[0 0 1 1])
 % plot(v{1}(1,:),mcleans)
@@ -223,25 +186,4 @@ difference = PercentageDifference(mcleans,simpleEmpirical);
 % ylabel("Absorbance, -ln(I/Io)")
 % grid on
 
-% figure('units','normalized','outerposition',[0 0 1 1])
-% yyaxis left
-% plot(v{1}(1,:),kielkopf);
-% title("Simple empirical approximation vs Mcleans for range " + vStart + " to " + vEnd)
-% xlabel("Frequency, cm^{-1}")
-% ylabel("Absorbance, (I/Io)")
-% yyaxis right
-% plot(v{1}(1,:),mcleans)
-% grid on
-% legend('Simple Empirical approxiamtion','Mcleans Model');
- 
-figure('units','normalized','outerposition',[0 0 1 1])
-plot(v{1}(1,:),mcleans)
-title("Mcleans Approximation against SpectraPlot for range " + vStart + " to " + vEnd +" cm-1")
-xlabel("Frequency, cm-1")
-ylabel("Absorbance, (I/Io)")
-grid on
-hold on
-plot(v{1}(1,:),carbonSpectra)
-legend('Mcleans Approximation','SpectraPlot Model');
 
-% GUI(GasTransitions,gases)

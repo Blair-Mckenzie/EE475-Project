@@ -1,47 +1,52 @@
-function GUI(Transitions,Gases)
+load('C:\Users\Blair\Documents\Uni\4thYear\gasTransitions',...
+    'GasTransitions')
+data = GasTransitions;
+tempData = GasTransitions;
+load('gasMap','gases')
+Gases = gases;
 
-data = Transitions;
+fig = uifigure('Visible','off','Position',[50 30 1300 700]);
 
-fig = uifigure('Visible','off','Position',[150 80 1600 850]);
 m = uimenu(fig,'Text','&File');
 mitem = uimenu(m,'Text','&Help');
 mitem2 = uimenu(m,'Text','&About');
+mitem2.MenuSelectedFcn = @(src,event)MenuSelected();
 
-lblTitle = uilabel(fig,'Position',[425,775,500,50]);
+lblTitle = uilabel(fig,'Position',[400,635,500,50]);
 lblTitle.Text = "GUI for modelling Molecular Spectra";
 lblTitle.FontSize = 22;
 
-ax = uiaxes(fig,'Position',[50,50,975,700]);
+ax = uiaxes(fig,'Position',[30,30,750,600]);
 
-lblModelType = uilabel(fig,'Position',[1050,725,200,50]);
+lblModelType = uilabel(fig,'Position',[800,590,200,50]);
 lblModelType.Text = "Approximation";
-ddModelType = uidropdown(fig,'Position',[1050,690,200,50]);    
+ddModelType = uidropdown(fig,'Position',[800,555,200,50]);    
 ddModelType.Items = {'Mcleans','Simple Empirical','Kielkopf'};
 
-lblGasSelect = uilabel(fig,'Position',[1050,650,200,50]);
+lblGasSelect = uilabel(fig,'Position',[800,520,200,50]);
 lblGasSelect.Text = "Select Gas";
-ddGasSelect = uidropdown(fig,'Position',[1050,615,200,50]);
+ddGasSelect = uidropdown(fig,'Position',[800,485,200,50]);
 ddGasSelect.Items = keys(Gases);
 
-lblFrequencyStart = uilabel(fig,'Position',[1050,575,200,50]);
+lblFrequencyStart = uilabel(fig,'Position',[800,450,200,50]);
 lblFrequencyStart.Text = "Frequency Start (cm-1)";
 editFrequencyStart = uieditfield(fig,'numeric','Position',...
-    [1050,540,200,50]);
+    [800,415,200,50]);
 
-lblFrequencyEnd = uilabel(fig,'Position',[1050,500,200,50]);
+lblFrequencyEnd = uilabel(fig,'Position',[800,380,200,50]);
 lblFrequencyEnd.Text = "Frequency End (cm-1)";
 editFrequencyEnd = uieditfield(fig,'numeric','Position',...
-    [1050,465,200,50]);
+    [800,345,200,50]);
 
-lblFrequencyStartNm = uilabel(fig,'Position',[1300,575,200,50]);
+lblFrequencyStartNm = uilabel(fig,'Position',[1050,450,200,50]);
 lblFrequencyStartNm.Text = "Wavelength (nm)";
 editFrequencyStartNm = uieditfield(fig,'numeric','Position',...
-    [1300,540,200,50]);
+    [1050,415,200,50]);
 
-lblFrequencyEndNm = uilabel(fig,'Position',[1300,500,200,50]);
+lblFrequencyEndNm = uilabel(fig,'Position',[1050,380,200,50]);
 lblFrequencyEndNm.Text = "Wavelength (nm)";
 editFrequencyEndNm = uieditfield(fig,'numeric','Position',...
-    [1300,465,200,50]);
+    [1050,345,200,50]);
 
 editFrequencyStart.ValueChangedFcn = @(numfld,event)changeUnits...
     (editFrequencyStartNm,editFrequencyStart);
@@ -52,16 +57,16 @@ editFrequencyStartNm.ValueChangedFcn = @(numfld,event)changeUnits...
 editFrequencyEndNm.ValueChangedFcn = @(numfld,event)changeUnits...
     (editFrequencyEnd,editFrequencyEndNm);
 
-lblTemp = uilabel(fig,'Position',[1050,425,200,50]);
+lblTemp = uilabel(fig,'Position',[800,310,200,50]);
 lblTemp.Text = "Temperature (K)";
-editTemp = uieditfield(fig,'numeric','Position',[1050,390,200,50],...
+editTemp = uieditfield(fig,'numeric','Position',[800,275,200,50],...
     'Limits',[0,Inf],...
     'RoundFractionalValues','on');
 
-lblTempDeg = uilabel(fig,'Position',[1300,425,200,50]);
+lblTempDeg = uilabel(fig,'Position',[1050,310,200,50]);
 text = sprintf('Temperature (%cC)' , char(176));
 lblTempDeg.Text = text;
-editTempDeg = uieditfield(fig,'numeric','Position',[1300,390,200,50],...
+editTempDeg = uieditfield(fig,'numeric','Position',[1050,275,200,50],...
     'Limits',[-273.15,Inf],...
     'RoundFractionalValues','on');
 
@@ -70,62 +75,72 @@ editTemp.ValueChangedFcn = @(numfld,event)changeTempDeg...
 editTempDeg.ValueChangedFcn = @(numfld,event)changeTempK...
     (editTemp,editTempDeg);
 
-lblPressure = uilabel(fig,'Position',[1300,350,200,50]);
+lblPressure = uilabel(fig,'Position',[1050,240,200,50]);
 lblPressure.Text = "Pressure (Atm)";
-editPressure = uieditfield(fig,'numeric','Position',[1300,315,200,50],...
+editPressure = uieditfield(fig,'numeric','Position',[1050,205,200,50],...
     'Limits',[0,Inf],...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','on');
 
-lblConcentration = uilabel(fig,'Position',[1300,725,200,50]);
+lblConcentration = uilabel(fig,'Position',[1050,590,200,50]);
 lblConcentration.Text = "Concentration (mol/L)";
 editConcentration = uieditfield(fig,'numeric','Position',...
-    [1300,690,200,50],...
+    [1050,555,200,50],...
     'Limits',[0,Inf],...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','on');
 
-lblPLength = uilabel(fig,'Position',[1300,650,200,50]);
+lblPLength = uilabel(fig,'Position',[1050,520,200,50]);
 lblPLength.Text = "Path Length (cm)";
 editPLength = uieditfield(fig,'numeric','Position',...
-    [1300,615,200,50],...
+    [1050,485,200,50],...
     'Limits',[0,Inf],...
     'LowerLimitInclusive','on',...
     'UpperLimitInclusive','on');
 
-lblPlotType = uilabel(fig,'Position',[1050,350,200,50]);
+lblPlotType = uilabel(fig,'Position',[800,240,200,50]);
 lblPlotType.Text = "Plot Type";
-plotTypeSelect = uidropdown(fig,'Position',[1050,315,200,50]);
+plotTypeSelect = uidropdown(fig,'Position',[800,205,200,50]);
 plotTypeSelect.Items = {'Absorption', 'Transmission'}; 
 
 plotButton = uibutton(fig,...
-'Position',[1075,225,125,30],...
+'Position',[800,155,125,30],...
 'Text','Plot');
 
 clearButton = uibutton(fig,...
-'Position',[1225,225,125,30],...
+'Position',[950,155,125,30],...
 'Text','Clear Plot');
 clearButton.Enable = 'off';
 
 addPlotsButton = uibutton(fig,...
-    'Position',[1375,225,125,30],...
+    'Position',[1100,155,125,30],...
     'Text','Sum Current Plots');
 addPlotsButton.Enable = 'off';
-
 
 numClicks = 0;
 guidata(fig,numClicks);
 currentPlots ={};
 setappdata(fig,'currentPlots',currentPlots);
+times=[];
+setappdata(fig,'times',times);
              
 addPlotsButton.ButtonPushedFcn = @(btn,event)sumCurrentPlots(fig,ax);
-clearButton.ButtonPushedFcn = @(btn,event)clearPlot(fig,ax,clearButton,addPlotsButton,plotButton);
+clearButton.ButtonPushedFcn = @(btn,event)clearPlot(ax,clearButton,...
+    addPlotsButton,plotButton);
 
-plotButton.ButtonPushedFcn = @(btn,event)plotButtonPress(fig,ax,addPlotsButton,...
-    clearButton,data,Gases,ddModelType,ddGasSelect,plotTypeSelect,editFrequencyStart,...
-    editFrequencyEnd,editTemp,editPressure,editConcentration,editPLength); 
-
+plotButton.ButtonPushedFcn = @(btn,event)plotButtonPress(fig,ax,...
+    addPlotsButton,clearButton,data,Gases,ddModelType,ddGasSelect,...
+    plotTypeSelect,editFrequencyStart,editFrequencyEnd,editTemp,...
+    editPressure,editConcentration,editPLength); 
 fig.Visible = 'on';
+
+function MenuSelected()
+    title = "About";
+    message = sprintf('Author: Blair McKenzie\nGUI Developed as part of fullfilment of 4th Year individial project\nHITRAN 2016 was used to obtain spectroscopic parameters');
+    f = msgbox(message,title);
+    set(f, 'position', [400 400 500 100]);
+    th = findall(f, 'Type', 'Text');
+    th.FontSize = 12;
 end
 
 function changeUnits(fieldToBeChanged, referenceField)
@@ -140,10 +155,7 @@ function changeTempK(editTemp,editTempDeg)
     editTemp.Value = round(editTempDeg.Value + 273.15);
 end
 
-function clearPlot(fig,ax,clearButton,addPlotsButton,plotButton)
-    numClicks = guidata(fig);
-    numClicks = 0;
-    guidata(fig,numClicks); 
+function clearPlot(ax,clearButton,addPlotsButton,plotButton)
     cla(ax,'reset');
     clearButton.Enable = 'off';
     addPlotsButton.Enable = 'off';
@@ -163,6 +175,7 @@ end
 function plotButtonPress(fig,ax,addPlotsButton,clearButton,tempdata,...
     Gases,ddModelType,ddGasSelect,plotTypeSelect,editFrequencyStart,...
     editFrequencyEnd,editTemp,editPressure,editConcentration,editPLength)
+tic
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Resizing data to match selected gas
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -171,8 +184,10 @@ function plotButtonPress(fig,ax,addPlotsButton,clearButton,tempdata,...
     tempdata = tempdata(gasFind,(1:10));
 
     numIso = max(tempdata(:,2));
-    isoChoice = str2double(sprintfc('%01d',1:numIso));                     % Isotopologue(s) to be looked at
-    isoSize = length(isoChoice);                                           % Size of isoChoice martix
+    % Isotopologue(s) to be looked at
+    isoChoice = str2double(sprintfc('%01d',1:numIso));
+    % Size of isoChoice martix
+    isoSize = length(isoChoice);                                           
     data = cell(1,isoSize);                 
     for n = 1: isoSize
         isoFind = (tempdata(:,2 )== isoChoice(n));
@@ -183,7 +198,8 @@ function plotButtonPress(fig,ax,addPlotsButton,clearButton,tempdata,...
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     partitions = cell(1,isoSize);
     for n = 1: length(isoChoice)
-    partFilePath = strcat(pwd,'\GasData\',gasChoice,num2str(isoChoice(n)),'.txt');
+    partFilePath = strcat(pwd,'\GasData\',gasChoice,...
+        num2str(isoChoice(n)),'.txt');
     fid = fopen(partFilePath);
     formatSpec  = '%4f %16f %*[^\n]';
     st0 = textscan(fid,formatSpec);
@@ -230,7 +246,7 @@ function plotButtonPress(fig,ax,addPlotsButton,clearButton,tempdata,...
     concentration = editConcentration.Value;        % Concentration
     pLength = editPLength.Value;                    % Length of cell(cm)
     M = masses(isoChoice);                          % Molecular mass of the selected gas
-    step = 500;                                     % Number of data points in wavelength
+    step = 1000;                                    % Number of data points in wavelength
     
     if(cellfun(@isempty,data))
         uialert(fig,'No absorbance for specified frequency range, please try again','Plot Error'); 
@@ -240,7 +256,7 @@ function plotButtonPress(fig,ax,addPlotsButton,clearButton,tempdata,...
         clearButton.Enable = 'on';
         numClicks = guidata(fig);
         numClicks = numClicks + 1;
-        if(numClicks == 2)
+        if(numClicks >= 2)
             addPlotsButton.Enable = 'on';
         end
         guidata(fig,numClicks);   
@@ -290,7 +306,7 @@ function plotButtonPress(fig,ax,addPlotsButton,clearButton,tempdata,...
     plotType = plotTypeSelect.Value;
     ax.XGrid='on'; ax.YGrid='on';
     ax.Title.String = "Final " + plotType + " for " + gasChoice +...
-        " in the range " + vStart + " to " + vEnd;
+        " in the range " + vStart + " to " + vEnd + " cm^{-1}";
     ax.Title.FontSize = 14;
     ax.YLabel.String = 'Absorbance, (I/Io)';
     ax.YLabel.FontSize = 11; ax.YLabel.FontWeight = 'bold';
@@ -337,7 +353,7 @@ function plotButtonPress(fig,ax,addPlotsButton,clearButton,tempdata,...
    setappdata(fig,'currentPlot',currentPlots);
    legendText = strcat(gasChoice,": ",approxSelect);
    plot(ax,x,out,'DisplayName',legendText);  
-   legend(ax,'FontSize',10);
-   end
+   legend(ax);
+    end 
+toc
 end
-
