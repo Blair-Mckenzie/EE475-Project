@@ -6,3 +6,6 @@ Generating a GUI for modelling molecular spectra
 
 ### Transition matrix link
 https://uk.mathworks.com/matlabcentral/fileexchange/86760-matrix-for-all-gas-transitions-in-the-hitran-database?s_tid=prof_contriblnk
+
+### Mathworks File Exchange profile
+[![View EE475-Project on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://uk.mathworks.com/matlabcentral/fileexchange/89644-ee475-project)
