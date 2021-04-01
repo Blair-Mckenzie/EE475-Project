@@ -10,7 +10,8 @@ fig = uifigure('Visible','off','Position',[50 30 1300 700]);
 m = uimenu(fig,'Text','&File');
 mitem = uimenu(m,'Text','&Help');
 mitem2 = uimenu(m,'Text','&About');
-mitem2.MenuSelectedFcn = @(src,event)MenuSelected();
+mitem.MenuSelectedFcn = @(src,event)helpSelected();
+mitem2.MenuSelectedFcn = @(src,event)aboutSelected();
 
 lblTitle = uilabel(fig,'Position',[400,635,500,50]);
 lblTitle.Text = "GUI for modelling Molecular Spectra";
@@ -134,7 +135,16 @@ plotButton.ButtonPushedFcn = @(btn,event)plotButtonPress(fig,ax,...
     editPressure,editConcentration,editPLength); 
 fig.Visible = 'on';
 
-function MenuSelected()
+function helpSelected()
+    title = "Help";
+    message = sprintf('Select an approximation from the drop-down, then choose your desired gas\nFill in all of the available fields\nSelect a plot type to obtain a final plot\nThere is limits on both the frequency/wavelength range and the temperature');
+    f = msgbox(message,title);
+    set(f, 'position', [400 400 500 100]);
+    th = findall(f, 'Type', 'Text');
+    th.FontSize = 12;
+end
+
+function aboutSelected()
     title = "About";
     message = sprintf('Author: Blair McKenzie\nGUI Developed as part of fullfilment of 4th Year individial project\nHITRAN 2016 was used to obtain spectroscopic parameters');
     f = msgbox(message,title);
